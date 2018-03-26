@@ -12,18 +12,16 @@ public class UserDetails {
     private String Email;
     private  Uri PhotoUrl;
     private String PhoneNumber;
-    private String[] Subscriptions;
 
     public UserDetails() {
 
     }
 
-    public UserDetails(String displayName, String email, Uri photoUrl, String phoneNumber, String[] subscriptions) {
+    public UserDetails(String displayName, String email, Uri photoUrl, String phoneNumber) {
         DisplayName = displayName;
         Email = email;
         PhotoUrl = photoUrl;
         PhoneNumber = phoneNumber;
-        Subscriptions = subscriptions;
     }
 
 
@@ -58,14 +56,6 @@ public class UserDetails {
 
     public void setPhoneNumber(String phoneNumber) {
         PhoneNumber = phoneNumber;
-    }
-
-    public String[] getSubscriptions() {
-        return Subscriptions;
-    }
-
-    public void setSubscriptions(String[] subscriptions) {
-        Subscriptions = subscriptions;
     }
 
     @Override

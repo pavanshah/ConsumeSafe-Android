@@ -42,7 +42,10 @@ dependencies {
     compile('com.facebook.android:facebook-android-sdk:4.27.0')
 
     //Other dependencies
-    compile 'com.android.support:recyclerview-v7:26.0.1-rc1'
+    compile 'com.android.support:recyclerview-v7:26.1.0'
+    compile 'com.android.support:cardview-v7:26.1.0'
+    compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.0'
+    compile 'de.hdodenhof:circleimageview:2.2.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

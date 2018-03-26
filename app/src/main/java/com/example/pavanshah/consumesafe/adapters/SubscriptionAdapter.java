@@ -24,14 +24,11 @@ import java.util.List;
 public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapter.SubscriptionHolder>  {
 
     private List<SubscriptionDetails> subscriptionList;
-    private Context context;
-    private List<SubscriptionDetails> resultList;
+    private static List<SubscriptionDetails> resultList = new ArrayList<>();
 
-    public SubscriptionAdapter(Context context, List<SubscriptionDetails> subscriptionList) {
-        this.context = context;
+    public SubscriptionAdapter(List<SubscriptionDetails> subscriptionList) {
         this.subscriptionList = subscriptionList;
-
-        Log.d("Subscribe", "Arraylist "+this.subscriptionList.size());
+        resultList = subscriptionList;
     }
 
     @Override
@@ -48,6 +45,7 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapte
         SubscriptionDetails subscriptionDetails = subscriptionList.get(i);
         SubscriptionHolder.Catagory.setText(subscriptionDetails.getCatagory());
         SubscriptionHolder.Subscribed.setChecked(subscriptionDetails.getSubscribed());
+        SubscriptionHolder.Subscribed.setTag(i);
     }
 
     @Override
@@ -67,15 +65,26 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapte
             Catagory =  (TextView) itemView.findViewById(R.id.Catagory);
             Subscribed = (CheckBox) itemView.findViewById(R.id.Subscribed);
 
-            Subscribed.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            Subscribed.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                public void onClick(View view) {
+                    CheckBox thisCheckBox = (CheckBox) view;
+                    Boolean result = thisCheckBox.isChecked();
+                    int position = (int) thisCheckBox.getTag();
 
+                    Log.d("Subscribe", "Button "+thisCheckBox.getTag());
+                    Log.d("Subscribe", "Status "+result);
+
+                    resultList.get(position).setSubscribed(result);
                 }
             });
-
         }
 
+    }
+
+
+    public static List<SubscriptionDetails> getSubscriptionList() {
+        return resultList;
     }
 
 }
