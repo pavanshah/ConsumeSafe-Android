@@ -31,6 +31,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,12 +81,10 @@ public class UserHomeActivity extends AppCompatActivity
         TextView userName = (TextView) header.findViewById(R.id.userName);
         TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
 
-        Log.d("Yup", "url "+activeUser.getPhotoUrl());
-
         userName.setText(activeUser.getDisplayName());
         userEmail.setText(activeUser.getEmail());
+        Picasso.with(getApplicationContext()).load(activeUser.getPhotoUrl().toString()).into(userImage);
 
-        userImage.setImageURI(Uri.parse(activeUser.getPhotoUrl().toString()));
 
         //all listeners
         cameraButton.setOnClickListener(new View.OnClickListener() {
