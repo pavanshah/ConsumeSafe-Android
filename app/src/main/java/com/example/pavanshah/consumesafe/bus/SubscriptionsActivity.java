@@ -65,6 +65,7 @@ public class SubscriptionsActivity extends AppCompatActivity {
         //Make server call with List
 
         Intent intent = new Intent(SubscriptionsActivity.this, UserHomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 }

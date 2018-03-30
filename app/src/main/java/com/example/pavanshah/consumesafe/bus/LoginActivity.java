@@ -12,12 +12,20 @@ import android.widget.Toast;
 
 import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.adapters.GlobalFeedsAdapter;
+import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
 import com.example.pavanshah.consumesafe.model.FeedsDetails;
 import com.example.pavanshah.consumesafe.model.UserDetails;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,36 +71,36 @@ public class LoginActivity extends AppCompatActivity {
 
 
         //Populate global feeds
-        ArrayList<FeedsDetails> globalFeedsData = new ArrayList<>();
 
-        FeedsDetails feedsDetails1 = new FeedsDetails();
-        feedsDetails1.setImageURL("https://www.cpsc.gov/s3fs-public/pic11.png");
-        feedsDetails1.setProductName("Nook toddler beds");
-        feedsDetails1.setNewsTitle("The Land of Nod Recalls Toddler Beds Due to Entrapment Hazard (Recall Alert)");
-
-        FeedsDetails feedsDetails2 = new FeedsDetails();
-        feedsDetails2.setImageURL("https://www.cpsc.gov/s3fs-public/Évolur Sleep Ultra Crib and Toddler Bed Mattress (Model 849).jpg");
-        feedsDetails2.setProductName("Crib and toddler bed mattresses");
-        feedsDetails2.setNewsTitle("Dream On Me Recalls Crib & Toddler Bed Mattresses Due to Violation of Federal Mattress Flammability Standard");
-
-        FeedsDetails feedsDetails3 = new FeedsDetails();
-        feedsDetails3.setImageURL("https://www.cpsc.gov/s3fs-public/Firm foam crib and toddler bed mattress in white print.jpg");
-        feedsDetails3.setProductName("Maui Ocean Center Toddler Drinking Cups");
-        feedsDetails3.setNewsTitle("CPSC, Charles Products Announce Recall of Toddler Drinking Cups");
-
-        globalFeedsData.add(feedsDetails1);
-        globalFeedsData.add(feedsDetails2);
-        globalFeedsData.add(feedsDetails3);
-
-
+        final JSONObject dataJSON = new JSONObject();
+        final ArrayList<FeedsDetails> globalFeedsData = new ArrayList<>();
+        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(globalFeedsData);;
         globalFeeds.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-
-        //Populate subscription page
-        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(globalFeedsData);
         globalFeeds.setAdapter(globalFeedsAdapter);
         globalFeeds.setLayoutManager(llm);
+
+        HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+        httpRequestHandler.sendHTTPRequest("/globalFeed/fetch", dataJSON, "consumesafeserver", new HTTPRequestHandler.VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject jSONObject) throws JSONException {
+
+                JSONArray allRecalls = jSONObject.getJSONArray("result");
+
+                Log.d("feeds", "length "+allRecalls.length());
+                for(int i = 0 ; i < allRecalls.length() ; i++)
+                {
+                    FeedsDetails feedsDetails = new Gson().fromJson(allRecalls.get(i).toString(), FeedsDetails.class);
+                    globalFeedsData.add(feedsDetails);
+                }
+
+                globalFeedsAdapter.notifyDataSetChanged();
+                Log.d("feeds", "data set changed");
+
+            }
+        });
     }
 
 
@@ -112,11 +120,13 @@ public class LoginActivity extends AppCompatActivity {
                 userDetailsObject.setPhoneNumber(user.getPhoneNumber());
                 userDetailsObject.setPhotoUrl(user.getPhotoUrl());
 
+                //Subscribe to global feeds
+                FirebaseMessaging.getInstance().subscribeToTopic("Global");
+
                 Log.d("PAVAN", "UserDetails Object "+ userDetailsObject.toString());
 
-                Toast.makeText(getApplicationContext(), "Sign in successful", Toast.LENGTH_SHORT).show();
-
                 Intent intent = new Intent(getApplicationContext(), UserHomeActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
 
             } else {

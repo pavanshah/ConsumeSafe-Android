@@ -93,8 +93,8 @@ public class HTTPRequestHandler extends Application {
             }
         }, new ErrorListener() {
             public void onErrorResponse(VolleyError error) {
-                Log.d("SPECIAL", "Inside error2" + error);
-                VolleyLog.e("Error: ", error.getMessage());
+                Log.d("feeds", "Inside error2" + error);
+                VolleyLog.e("feeds: ", error.getMessage());
                 NetworkResponse response = error.networkResponse;
                 if (response != null) {
                     switch (response.statusCode) {
