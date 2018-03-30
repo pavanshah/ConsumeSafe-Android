@@ -6,19 +6,53 @@
     android:orientation="horizontal"
     >
 
-    <TextView
-        android:id="@+id/Catagory"
+    <LinearLayout
+        android:id="@+id/firstItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:hint="Catagory"
-        />
-
-    <CheckBox
-        android:id="@+id/Subscribed"
-        android:layout_width="match_parent"
         android:layout_weight="1"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:id="@+id/Catagory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            />
+
+        <CheckBox
+            android:id="@+id/Subscribed"
+            android:layout_width="match_parent"
+            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/secondItem"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:id="@+id/Catagory2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            />
+
+        <CheckBox
+            android:id="@+id/Subscribed2"
+            android:layout_width="match_parent"
+            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            />
+
+    </LinearLayout>
+
 
 </LinearLayout>

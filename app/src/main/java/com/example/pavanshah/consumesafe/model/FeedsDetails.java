@@ -7,6 +7,7 @@ import java.util.Date;
  * Created by pavan on 3/4/2018.
  */
 
+
 public class FeedsDetails {
 
     private String ImageURL;
@@ -15,28 +16,22 @@ public class FeedsDetails {
     private String NewsBody;
     private String NewsURL;
     private String RecallDate;
-    private String RemedyInformation;
-    private String NoOfUnits;
-    private String MobileNumber;
-    private String EmailAddress;
-    private String Website;
+    //private String RemedyInformation;
+    //private String NoOfUnits;
 
     public FeedsDetails() {
 
     }
 
-    public FeedsDetails(String imageURL, String productName, String newsTitle, String newsBody, String newsURL, String recallDate, String remedyInformation, String noOfUnits, String mobileNumber, String emailAddress, String website) {
-        ImageURL = imageURL;
-        ProductName = productName;
-        NewsTitle = newsTitle;
-        NewsBody = newsBody;
-        NewsURL = newsURL;
-        RecallDate = recallDate;
-        RemedyInformation = remedyInformation;
-        NoOfUnits = noOfUnits;
-        MobileNumber = mobileNumber;
-        EmailAddress = emailAddress;
-        Website = website;
+    public FeedsDetails(String ImageURL, String ProductName, String NewsTitle, String NewsBody, String NewsURL, String RecallDate) {
+        ImageURL = ImageURL;
+        ProductName = ProductName;
+        NewsTitle = NewsTitle;
+        NewsBody = NewsBody;
+        NewsURL = NewsURL;
+        RecallDate = RecallDate;
+        //RemedyInformation = RemedyInformation;
+        //NoOfUnits = NoOfUnits;
     }
 
     public String getImageURL() {
@@ -71,7 +66,7 @@ public class FeedsDetails {
         NewsBody = newsBody;
     }
 
-    public String getRemedyInformation() {
+    /*public String getRemedyInformation() {
         return RemedyInformation;
     }
 
@@ -85,31 +80,7 @@ public class FeedsDetails {
 
     public void setNoOfUnits(String noOfUnits) {
         NoOfUnits = noOfUnits;
-    }
-
-    public String getMobileNumber() {
-        return MobileNumber;
-    }
-
-    public void setMobileNumber(String mobileNumber) {
-        MobileNumber = mobileNumber;
-    }
-
-    public String getEmailAddress() {
-        return EmailAddress;
-    }
-
-    public void setEmailAddress(String emailAddress) {
-        EmailAddress = emailAddress;
-    }
-
-    public String getWebsite() {
-        return Website;
-    }
-
-    public void setWebsite(String website) {
-        Website = website;
-    }
+    }*/
 
     public String getNewsURL() {
         return NewsURL;

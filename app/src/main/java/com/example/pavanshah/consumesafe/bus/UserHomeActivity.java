@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
@@ -91,6 +92,8 @@ public class UserHomeActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
 
+                ActivityCompat.requestPermissions(UserHomeActivity.this, new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, 1);
+
                 Log.d("IMAGECAPTURE", "scanReceipt");
                 Intent takePictureIntent = new Intent("android.media.action.IMAGE_CAPTURE");
                 try {
@@ -123,8 +126,20 @@ public class UserHomeActivity extends AppCompatActivity
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_CODE);
             }
         });
+    }
 
-
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length <= 0 || grantResults[0] != 0) {
+                    Toast.makeText(this, "Permission denied to Read/Write your External storage", Toast.LENGTH_SHORT).show();
+                    System.exit(0);
+                    return;
+                }
+                return;
+            default:
+                return;
+        }
     }
 
     private File createImageFile() throws IOException {
@@ -151,8 +166,6 @@ public class UserHomeActivity extends AppCompatActivity
                     Uri imageURL = taskSnapshot.getDownloadUrl();
                     progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(), "Upload successful", Toast.LENGTH_SHORT).show();
-
-                    /*HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();*/
 
                     JSONObject dataJSON = new JSONObject();
 

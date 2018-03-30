@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.pavanshah.consumesafe.R;
@@ -43,9 +44,23 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapte
     @Override
     public void onBindViewHolder(SubscriptionHolder holder, int i) {
         SubscriptionDetails subscriptionDetails = subscriptionList.get(i);
-        SubscriptionHolder.Catagory.setText(subscriptionDetails.getCatagory());
-        SubscriptionHolder.Subscribed.setChecked(subscriptionDetails.getSubscribed());
-        SubscriptionHolder.Subscribed.setTag(i);
+
+        if(i%2 == 0)
+        {
+            SubscriptionHolder.firstItem.setVisibility(View.VISIBLE);
+            SubscriptionHolder.secondItem.setVisibility(View.GONE);
+            SubscriptionHolder.Catagory.setText(subscriptionDetails.getCatagory());
+            SubscriptionHolder.Subscribed.setChecked(subscriptionDetails.getSubscribed());
+            SubscriptionHolder.Subscribed.setTag(i);
+        }
+        else
+        {
+            SubscriptionHolder.firstItem.setVisibility(View.GONE);
+            SubscriptionHolder.secondItem.setVisibility(View.VISIBLE);
+            SubscriptionHolder.Catagory2.setText(subscriptionDetails.getCatagory());
+            SubscriptionHolder.Subscribed2.setChecked(subscriptionDetails.getSubscribed());
+            SubscriptionHolder.Subscribed2.setTag(i);
+        }
     }
 
     @Override
@@ -59,11 +74,22 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapte
         protected static TextView Catagory;
         protected static CheckBox Subscribed;
 
+        protected static TextView Catagory2;
+        protected static CheckBox Subscribed2;
+
+        protected static LinearLayout firstItem;
+        protected static LinearLayout secondItem;
+
         public SubscriptionHolder(View itemView) {
             super(itemView);
 
             Catagory =  (TextView) itemView.findViewById(R.id.Catagory);
             Subscribed = (CheckBox) itemView.findViewById(R.id.Subscribed);
+            Catagory2 =  (TextView) itemView.findViewById(R.id.Catagory2);
+            Subscribed2 = (CheckBox) itemView.findViewById(R.id.Subscribed2);
+
+            firstItem = (LinearLayout) itemView.findViewById(R.id.firstItem);
+            secondItem = (LinearLayout) itemView.findViewById(R.id.secondItem);
 
             Subscribed.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -78,6 +104,22 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapte
                     resultList.get(position).setSubscribed(result);
                 }
             });
+
+
+            Subscribed2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CheckBox thisCheckBox = (CheckBox) view;
+                    Boolean result = thisCheckBox.isChecked();
+                    int position = (int) thisCheckBox.getTag();
+
+                    Log.d("Subscribe", "Button "+thisCheckBox.getTag());
+                    Log.d("Subscribe", "Status "+result);
+
+                    resultList.get(position).setSubscribed(result);
+                }
+            });
+
         }
 
     }

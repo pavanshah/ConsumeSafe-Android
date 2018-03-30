@@ -96,10 +96,19 @@
     <string name="title_activity_user_home">UserHomeActivity</string>
     <string name="camera">Camera</string>
 
+    <string name="slide_1_dec">Stay away from harmful consumer products.</string>
+    <string name="slide_2_dec">Scan your purchase receipts and get notified when a product is recalled from your purchase history.</string>
+    <string name="slide_3_dec">Report an unsafe product from app.</string>
+    <string name="slide_4_dec">Subscribe to the product catagories of your interest and get notified about recalls of your interest.</string>
+    <string name="slide_5_dec">Stay updated with global recall trends with smart analytics.</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="gallery">Gallery</string>
     <string name="register_complaint">Register Complaint</string>
     <string name="my_subscriptions">My Subscriptions</string>
     <string name="logout">Logout</string>
+    <string name="because_we_care">Because, We Care!</string>
+    <string name="next">next</string>
+    <string name="skip">skip</string>
 </resources>
