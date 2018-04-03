@@ -9,29 +9,13 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.pavanshah.consumesafe.bus.UserHomeActivity"
     tools:showIn="@layout/app_bar_user_home">
-
-
-    <LinearLayout
+    
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/globalFeeds"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/fab_margin"
         >
-
-        <Button
-            android:id="@+id/cameraButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/camera"
-            android:layout_weight="1"
-            />
-
-        <Button
-            android:id="@+id/galleryButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/gallery"
-            android:layout_weight="1"
-            />
-    </LinearLayout>
+    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

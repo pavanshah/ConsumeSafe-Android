@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
@@ -69,8 +70,8 @@ public class UserHomeActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //all declarations
-        Button cameraButton = (Button) findViewById(R.id.cameraButton);
-        Button galleryButton = (Button) findViewById(R.id.galleryButton);
+        FloatingActionButton cameraButton = (FloatingActionButton) findViewById(R.id.cameraButton);
+        //Button galleryButton = (Button) findViewById(R.id.galleryButton);
         progressDialog = new ProgressDialog(UserHomeActivity.this);
 
         //Firebase
@@ -117,15 +118,15 @@ public class UserHomeActivity extends AppCompatActivity
         });
 
 
-        galleryButton.setOnClickListener(new View.OnClickListener() {
+        /*galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
-                intent.setType("image/*");
+                intent.setType("image*//*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_CODE);
             }
-        });
+        });*/
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -133,9 +134,9 @@ public class UserHomeActivity extends AppCompatActivity
             case 1:
                 if (grantResults.length <= 0 || grantResults[0] != 0) {
                     Toast.makeText(this, "Permission denied to Read/Write your External storage", Toast.LENGTH_SHORT).show();
-                    System.exit(0);
                     return;
                 }
+
                 return;
             default:
                 return;
@@ -195,12 +196,6 @@ public class UserHomeActivity extends AppCompatActivity
                 }
             });
         }
-        else if(requestCode == this.PICK_IMAGE_CODE && resultCode == -1)
-        {
-            Log.d("Gallery", "data "+data.getExtras());
-        }
-
-
     }
 
 
