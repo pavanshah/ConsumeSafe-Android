@@ -111,4 +111,5 @@
     <string name="because_we_care">Because, We Care!</string>
     <string name="next">next</string>
     <string name="skip">skip</string>
+    <string name="title_activity_trial">TrialActivity</string>
 </resources>

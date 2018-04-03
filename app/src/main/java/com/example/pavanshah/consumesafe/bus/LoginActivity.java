@@ -3,6 +3,7 @@ package com.example.pavanshah.consumesafe.bus;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -80,6 +81,7 @@ public class LoginActivity extends AppCompatActivity {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         globalFeeds.setAdapter(globalFeedsAdapter);
         globalFeeds.setLayoutManager(llm);
+        globalFeeds.setItemAnimator(new DefaultItemAnimator());
 
         HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
         httpRequestHandler.sendHTTPRequest("/globalFeed/fetch", dataJSON, "consumesafeserver", new HTTPRequestHandler.VolleyCallback() {

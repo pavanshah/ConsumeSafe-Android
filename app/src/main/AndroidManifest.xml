@@ -23,9 +23,9 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".bus.LandingActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            >
+        <activity
+            android:name=".bus.LandingActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,7 +41,7 @@
             android:name=".bus.UserHomeActivity"
             android:label="@string/title_activity_user_home"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".bus.SubscriptionsActivity"></activity>
+        <activity android:name=".bus.SubscriptionsActivity" />
     </application>
 
 </manifest>
