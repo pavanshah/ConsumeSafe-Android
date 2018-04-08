@@ -42,6 +42,7 @@
             android:label="@string/title_activity_user_home"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".bus.SubscriptionsActivity" />
+        <activity android:name=".bus.DetailsActivity"></activity>
     </application>
 
 </manifest>

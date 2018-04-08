@@ -112,4 +112,8 @@
     <string name="next">next</string>
     <string name="skip">skip</string>
     <string name="title_activity_trial">TrialActivity</string>
+    <string name="register_your_purchases">Register your purchases</string>
+    <string name="check_global_feeds">Check global feeds</string>
+    <string name="your_subscriptions">Your Subscriptions</string>
+    <string name="save_changes">Save Changes</string>
 </resources>

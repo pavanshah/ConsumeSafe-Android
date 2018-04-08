@@ -21,11 +21,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.example.pavanshah.consumesafe.R;
+import com.example.pavanshah.consumesafe.adapters.GlobalFeedsAdapter;
 import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
+import com.example.pavanshah.consumesafe.model.FeedsDetails;
+import com.example.pavanshah.consumesafe.model.UserDetails;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,15 +39,19 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class UserHomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -52,6 +62,9 @@ public class UserHomeActivity extends AppCompatActivity
     private int PICK_IMAGE_CODE = 1;
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
     ProgressDialog progressDialog;
+    UserDetails userDetails;
+    HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+    HashMap<String, Boolean> subscriptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,18 +87,88 @@ public class UserHomeActivity extends AppCompatActivity
         //Button galleryButton = (Button) findViewById(R.id.galleryButton);
         progressDialog = new ProgressDialog(UserHomeActivity.this);
 
+        View header =  navigationView.getHeaderView(0);
+        final ImageView userImage = (ImageView) header.findViewById(R.id.userImage);
+        final TextView userName = (TextView) header.findViewById(R.id.userName);
+        final TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
+
         //Firebase
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser activeUser = mFirebaseAuth.getCurrentUser();
+        String userEmailId = activeUser.getEmail();
+        userEmailId = "apoorvpmehta@gmail.com";
 
-        View header =  navigationView.getHeaderView(0);
-        ImageView userImage = (ImageView) header.findViewById(R.id.userImage);
-        TextView userName = (TextView) header.findViewById(R.id.userName);
-        TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
+        //Populate all user details
+        JSONObject userDetailsJSON = new JSONObject();
+        try {
+            userDetailsJSON.put("email", userEmailId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        userName.setText(activeUser.getDisplayName());
-        userEmail.setText(activeUser.getEmail());
-        Picasso.with(getApplicationContext()).load(activeUser.getPhotoUrl().toString()).into(userImage);
+        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/user/getUserInfo", userDetailsJSON,new HTTPRequestHandler.VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject jSONObject) throws JSONException {
+                JSONObject user = jSONObject.getJSONObject("user");
+                userDetails = new Gson().fromJson(user.toString(), UserDetails.class);
+
+                userName.setText(userDetails.getDisplayName());
+                userEmail.setText(userDetails.getEmail());
+                Picasso.with(getApplicationContext()).load(userDetails.getPhotoUrl()).into(userImage);
+
+                populateSubscriptions();
+
+
+            }
+        });
+
+        ListView categorizedFeeds = findViewById(R.id.globalFeeds);
+        final ArrayList<FeedsDetails> categorizedFeedsData = new ArrayList<>();
+
+        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(getApplicationContext(), categorizedFeedsData);
+        categorizedFeeds.setAdapter(globalFeedsAdapter);
+
+        //Get personalized feeds of the user
+
+        String userEmailID = activeUser.getEmail();
+        userEmailID = "apoorvpmehta@gmail.com";
+
+        final JSONObject dataJSON = new JSONObject();
+        final JSONObject userJSON = new JSONObject();
+
+        try {
+            userJSON.put("email", userEmailID);
+            dataJSON.put("user", userJSON);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/subscription/categorizedFeeds", dataJSON, new HTTPRequestHandler.VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject jSONObject) throws JSONException {
+
+                JSONArray allRecalls = jSONObject.getJSONArray("result");
+
+                Log.d("feeds", "length "+allRecalls.length());
+                for(int i = 0 ; i < allRecalls.length() ; i++)
+                {
+                    JSONObject singleCategory = (JSONObject) allRecalls.get(i);
+                    JSONArray categoryFeeds = singleCategory.getJSONArray("feedResults");
+
+                    for(int j = 0 ; j < categoryFeeds.length() ; j++)
+                    {
+                        FeedsDetails feedsDetails = new Gson().fromJson(categoryFeeds.get(j).toString(), FeedsDetails.class);
+                        categorizedFeedsData.add(feedsDetails);
+                    }
+                }
+
+                globalFeedsAdapter.datasetchanged(categorizedFeedsData);
+                Log.d("Product", "data set changed "+categorizedFeedsData.size());
+
+            }
+        });
 
 
         //all listeners
@@ -127,6 +210,38 @@ public class UserHomeActivity extends AppCompatActivity
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_CODE);
             }
         });*/
+    }
+
+
+    public void populateSubscriptions()
+    {
+        //fetch all the categories from server
+        JSONObject dataJSON = new JSONObject();
+
+        httpRequestHandler.sendHTTPRequest(Request.Method.GET,"/subscription/allCategories", dataJSON, new HTTPRequestHandler.VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject jSONObject) throws JSONException {
+                JSONArray subscriptionArray = jSONObject.getJSONArray("categories");
+
+                subscriptions = new HashMap<>();
+
+                for(int i = 0 ; i < subscriptionArray.length() ; i++)
+                {
+                    JSONObject singleEntry = (JSONObject) subscriptionArray.get(i);
+                    subscriptions.put(singleEntry.getString("Category_Name"), false);
+                }
+
+                String[] mySubscriptions = userDetails.getSubscribedCategories();
+
+                for(int j = 0 ; j < mySubscriptions.length ; j++)
+                {
+                    subscriptions.put(mySubscriptions[j], true);
+                }
+
+                Log.d("Subscribe", "My subscriptions "+subscriptions.toString());
+            }
+        });
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -179,8 +294,7 @@ public class UserHomeActivity extends AppCompatActivity
                     }
 
                     //Sending URL to server
-                    HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
-                    httpRequestHandler.sendHTTPRequest("/api/storage/scannedImg", dataJSON, "consumesafeserver", new HTTPRequestHandler.VolleyCallback(){
+                    httpRequestHandler.sendHTTPRequest(Request.Method.POST, "/api/storage/scannedImg", dataJSON, new HTTPRequestHandler.VolleyCallback(){
 
                         @Override
                         public void onSuccess(JSONObject jSONObject) throws JSONException {
@@ -237,18 +351,33 @@ public class UserHomeActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.my_subscriptions) {
+        switch(id)
+        {
+            case R.id.register_products :
+                break;
 
-            Intent intent = new Intent(UserHomeActivity.this, SubscriptionsActivity.class);
-            startActivity(intent);
+            case R.id.global_feeds :
+                Intent globalintent = new Intent(UserHomeActivity.this, LoginActivity.class);
+                startActivity(globalintent);
+                break;
 
-        } else if (id == R.id.register_complaint) {
+            case R.id.my_subscriptions :
+                Intent subscriptionintent = new Intent(UserHomeActivity.this, SubscriptionsActivity.class);
+                subscriptionintent.putExtra("subscriptions", subscriptions);
+                startActivity(subscriptionintent);
+                break;
 
-        } else if (id == R.id.logout) {
+            case R.id.register_complaint :
+                break;
+
+            case R.id.logout :
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(getApplicationContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(UserHomeActivity.this, LandingActivity.class);
-                startActivity(intent);
+                Intent logout = new Intent(UserHomeActivity.this, LandingActivity.class);
+                startActivity(logout);
+
+            default :
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

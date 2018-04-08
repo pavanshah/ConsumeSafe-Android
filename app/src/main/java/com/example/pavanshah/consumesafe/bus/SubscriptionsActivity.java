@@ -13,9 +13,17 @@ import android.widget.Toast;
 
 import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.adapters.SubscriptionAdapter;
+import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
+import com.example.pavanshah.consumesafe.model.FeedsDetails;
 import com.example.pavanshah.consumesafe.model.SubscriptionDetails;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SubscriptionsActivity extends AppCompatActivity {
@@ -28,40 +36,26 @@ public class SubscriptionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subscriptions);
 
-        //All declarations
-        SubscriptionDetails subscriptionDetails1 = new SubscriptionDetails();
-        subscriptionDetails1.setCatagory("Baby Products");
-        subscriptionDetails1.setSubscribed(true);
+        Intent intent = getIntent();
+        HashMap<String, Boolean> subscriptions = (HashMap<String, Boolean>)intent.getSerializableExtra("subscriptions");
 
-        SubscriptionDetails subscriptionDetails2 = new SubscriptionDetails();
-        subscriptionDetails2.setCatagory("Healthcare");
-        subscriptionDetails2.setSubscribed(false);
-
-        SubscriptionDetails subscriptionDetails3 = new SubscriptionDetails();
-        subscriptionDetails3.setCatagory("Personal Care");
-        subscriptionDetails3.setSubscribed(true);
-
-        subscriptionData.add(subscriptionDetails1);
-        subscriptionData.add(subscriptionDetails2);
-        subscriptionData.add(subscriptionDetails3);
-
-        RecyclerView subscriptionList = (RecyclerView) findViewById(R.id.subscriptionList);
-        subscriptionList.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        ListView subscriptionList = findViewById(R.id.subscriptionList);
 
         //Populate subscription page
-        final SubscriptionAdapter subscriptionAdapter = new SubscriptionAdapter(subscriptionData);
+        final SubscriptionAdapter subscriptionAdapter = new SubscriptionAdapter(getApplicationContext(), subscriptions);
         subscriptionList.setAdapter(subscriptionAdapter);
-        subscriptionList.setLayoutManager(llm);
-
     }
 
     @Override
     public void onBackPressed() {
 
-        List resultList = (ArrayList<SubscriptionDetails>) SubscriptionAdapter.getSubscriptionList();
+         List resultList = (ArrayList<SubscriptionDetails>) SubscriptionAdapter.getResultList();
 
+         for(int i = 0 ; i < resultList.size() ; i++)
+         {
+             SubscriptionDetails subscriptionDetails = (SubscriptionDetails) resultList.get(i);
+             Log.d("BACK", subscriptionDetails.getCatagory()+" "+subscriptionDetails.getSubscribed());
+         }
         //Make server call with List
 
         Intent intent = new Intent(SubscriptionsActivity.this, UserHomeActivity.class);

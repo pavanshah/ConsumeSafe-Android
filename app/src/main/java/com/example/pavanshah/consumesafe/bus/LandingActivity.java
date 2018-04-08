@@ -49,12 +49,6 @@ public class LandingActivity extends AppCompatActivity {
 
                 if(activeUser != null)
                 {
-                    UserDetails userDetailsObject = new UserDetails();
-                    userDetailsObject.setDisplayName(userDetailsObject.getDisplayName());
-                    userDetailsObject.setEmail(userDetailsObject.getEmail());
-                    userDetailsObject.setPhoneNumber(userDetailsObject.getPhoneNumber());
-                    userDetailsObject.setPhotoUrl(userDetailsObject.getPhotoUrl());
-
                     intent = new Intent(LandingActivity.this, UserHomeActivity.class);
                 }
                 else

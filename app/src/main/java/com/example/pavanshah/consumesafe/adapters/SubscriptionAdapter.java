@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,117 +17,117 @@ import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.model.SubscriptionDetails;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pavan on 3/23/2018.
  */
 
-public class SubscriptionAdapter extends RecyclerView.Adapter<SubscriptionAdapter.SubscriptionHolder>  {
+public class SubscriptionAdapter extends BaseAdapter  {
 
-    private List<SubscriptionDetails> subscriptionList;
+    private static LayoutInflater inflater=null;
+    Context context;
     private static List<SubscriptionDetails> resultList = new ArrayList<>();
 
-    public SubscriptionAdapter(List<SubscriptionDetails> subscriptionList) {
-        this.subscriptionList = subscriptionList;
-        resultList = subscriptionList;
+    public SubscriptionAdapter(Context context) {
+        this.context = context;
+        inflater = ( LayoutInflater )context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+
+    public SubscriptionAdapter(Context context,  HashMap<String, Boolean> subscriptions) {
+        this.context=context;
+
+        resultList.clear();
+
+        Iterator it = subscriptions.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+
+            SubscriptionDetails subscriptionDetails = new SubscriptionDetails(pair.getKey().toString(), (Boolean) pair.getValue());
+            resultList.add(subscriptionDetails);
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+
+        inflater = ( LayoutInflater )context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    public SubscriptionHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.
-                from(parent.getContext()).
-                inflate(R.layout.list_subscription, parent, false);
-
-        return new SubscriptionHolder(itemView);
+    public int getCount() {
+        return resultList.size();
     }
 
     @Override
-    public void onBindViewHolder(SubscriptionHolder holder, int i) {
-        SubscriptionDetails subscriptionDetails = subscriptionList.get(i);
-
-        if(i%2 == 0)
-        {
-            SubscriptionHolder.firstItem.setVisibility(View.VISIBLE);
-            SubscriptionHolder.secondItem.setVisibility(View.GONE);
-            SubscriptionHolder.Catagory.setText(subscriptionDetails.getCatagory());
-            SubscriptionHolder.Subscribed.setChecked(subscriptionDetails.getSubscribed());
-            SubscriptionHolder.Subscribed.setTag(i);
-        }
-        else
-        {
-            SubscriptionHolder.firstItem.setVisibility(View.GONE);
-            SubscriptionHolder.secondItem.setVisibility(View.VISIBLE);
-            SubscriptionHolder.Catagory2.setText(subscriptionDetails.getCatagory());
-            SubscriptionHolder.Subscribed2.setChecked(subscriptionDetails.getSubscribed());
-            SubscriptionHolder.Subscribed2.setTag(i);
-        }
+    public Object getItem(int i) {
+        return i;
     }
 
     @Override
-    public int getItemCount() {
-        Log.d("Subscribe", "Arraylist here "+subscriptionList.size());
-        return subscriptionList.size();
+    public long getItemId(int i) {
+        return i;
     }
 
-    public static class SubscriptionHolder extends RecyclerView.ViewHolder {
+    public class SubscriptionHolder {
+        protected TextView Catagory;
+        protected CheckBox Subscribed;
+    }
 
-        protected static TextView Catagory;
-        protected static CheckBox Subscribed;
+    public void datasetchanged(HashMap<String, Boolean> subscriptions) {
 
-        protected static TextView Catagory2;
-        protected static CheckBox Subscribed2;
+        resultList.clear();
 
-        protected static LinearLayout firstItem;
-        protected static LinearLayout secondItem;
+        Iterator it = subscriptions.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
 
-        public SubscriptionHolder(View itemView) {
-            super(itemView);
-
-            Catagory =  (TextView) itemView.findViewById(R.id.Catagory);
-            Subscribed = (CheckBox) itemView.findViewById(R.id.Subscribed);
-            Catagory2 =  (TextView) itemView.findViewById(R.id.Catagory2);
-            Subscribed2 = (CheckBox) itemView.findViewById(R.id.Subscribed2);
-
-            firstItem = (LinearLayout) itemView.findViewById(R.id.firstItem);
-            secondItem = (LinearLayout) itemView.findViewById(R.id.secondItem);
-
-            Subscribed.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CheckBox thisCheckBox = (CheckBox) view;
-                    Boolean result = thisCheckBox.isChecked();
-                    int position = (int) thisCheckBox.getTag();
-
-                    Log.d("Subscribe", "Button "+thisCheckBox.getTag());
-                    Log.d("Subscribe", "Status "+result);
-
-                    resultList.get(position).setSubscribed(result);
-                }
-            });
-
-
-            Subscribed2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CheckBox thisCheckBox = (CheckBox) view;
-                    Boolean result = thisCheckBox.isChecked();
-                    int position = (int) thisCheckBox.getTag();
-
-                    Log.d("Subscribe", "Button "+thisCheckBox.getTag());
-                    Log.d("Subscribe", "Status "+result);
-
-                    resultList.get(position).setSubscribed(result);
-                }
-            });
-
+            SubscriptionDetails subscriptionDetails = new SubscriptionDetails(pair.getKey().toString(), (Boolean) pair.getValue());
+            resultList.add(subscriptionDetails);
+            it.remove(); // avoids a ConcurrentModificationException
         }
 
+        Log.d("Product", "Data set changed");
+        notifyDataSetChanged();
     }
 
 
-    public static List<SubscriptionDetails> getSubscriptionList() {
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+
+        final SubscriptionAdapter.SubscriptionHolder holder = new SubscriptionAdapter.SubscriptionHolder();
+
+        View rowView;
+
+        rowView = inflater.inflate(R.layout.list_subscription, null);
+
+        holder.Catagory = (TextView) rowView.findViewById(R.id.Catagory);
+
+        holder.Subscribed = (CheckBox) rowView.findViewById(R.id.Subscribed);
+
+        final SubscriptionDetails subscriptionDetails = resultList.get(i);
+
+        holder.Catagory.setText(subscriptionDetails.getCatagory());
+        holder.Subscribed.setChecked(subscriptionDetails.getSubscribed());
+        holder.Subscribed.setTag(i);
+
+        holder.Subscribed.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                int index = (int) compoundButton.getTag();
+                SubscriptionDetails subscriptionDetails = resultList.get(index);
+                subscriptionDetails.setSubscribed(b);
+                resultList.add(index, subscriptionDetails);
+            }
+        });
+
+        return rowView;
+    }
+
+    public static List<SubscriptionDetails> getResultList() {
         return resultList;
     }
-
 }

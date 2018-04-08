@@ -5,6 +5,14 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/register_products"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/register_your_purchases" />
+        <item
+            android:id="@+id/global_feeds"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/check_global_feeds" />
+        <item
             android:id="@+id/my_subscriptions"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/my_subscriptions" />
