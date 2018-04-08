@@ -1,5 +1,7 @@
 package com.example.pavanshah.consumesafe.model;
 
+import org.json.JSONArray;
+
 import java.net.URL;
 import java.util.Date;
 
@@ -10,37 +12,60 @@ import java.util.Date;
 
 public class FeedsDetails {
 
-    private String ImageURL;
+    private String RecallID;
+    //private String ImageURL;
+    //private String[] ImageURLS;
     private String ProductName;
     private String NewsTitle;
     private String NewsBody;
     private String NewsURL;
     private String RecallDate;
-    //private String RemedyInformation;
-    //private String NoOfUnits;
+    private String Hazard;
+    private String Remedy;
+    private String Retailer;
+    private String Manufacturer;
+    private String ManufacturerCountries;
+    private String Injuries;
+    private String ConsumerContact;
 
     public FeedsDetails() {
 
     }
 
-    public FeedsDetails(String ImageURL, String ProductName, String NewsTitle, String NewsBody, String NewsURL, String RecallDate) {
-        ImageURL = ImageURL;
+    public FeedsDetails(String RecallID, String ProductName, String NewsTitle,
+                        String NewsBody, String NewsURL, String RecallDate, String Remedy, String Retailer, String Manufacturer,
+                        String ManufacturerCountries, String Injuries, String ConsumerContact) {
+        RecallID = RecallID;
+        //ImageURL = ImageURL;
+        //ImageURLS = ImageURLS;
         ProductName = ProductName;
         NewsTitle = NewsTitle;
         NewsBody = NewsBody;
         NewsURL = NewsURL;
         RecallDate = RecallDate;
-        //RemedyInformation = RemedyInformation;
-        //NoOfUnits = NoOfUnits;
+        Remedy = Remedy;
+        Retailer = Retailer;
+        Manufacturer = Manufacturer;
+        ManufacturerCountries = ManufacturerCountries;
+        Injuries = Injuries;
+        ConsumerContact = ConsumerContact;
     }
 
-    public String getImageURL() {
+    public String getRecallID() {
+        return RecallID;
+    }
+
+    public void setRecallID(String recallID) {
+        RecallID = recallID;
+    }
+
+    /*public String getImageURL() {
         return ImageURL;
     }
 
     public void setImageURL(String imageURL) {
         ImageURL = imageURL;
-    }
+    }*/
 
     public String getProductName() {
         return ProductName;
@@ -66,22 +91,6 @@ public class FeedsDetails {
         NewsBody = newsBody;
     }
 
-    /*public String getRemedyInformation() {
-        return RemedyInformation;
-    }
-
-    public void setRemedyInformation(String remedyInformation) {
-        RemedyInformation = remedyInformation;
-    }
-
-    public String getNoOfUnits() {
-        return NoOfUnits;
-    }
-
-    public void setNoOfUnits(String noOfUnits) {
-        NoOfUnits = noOfUnits;
-    }*/
-
     public String getNewsURL() {
         return NewsURL;
     }
@@ -96,5 +105,69 @@ public class FeedsDetails {
 
     public void setRecallDate(String recallDate) {
         RecallDate = recallDate;
+    }
+
+    /*public String[] getImageURLS() {
+        return ImageURLS;
+    }
+
+    public void setImageURLS(String[] imageURLS) {
+        ImageURLS = imageURLS;
+    }*/
+
+    public String getHazard() {
+        return Hazard;
+    }
+
+    public void setHazard(String hazard) {
+        Hazard = hazard;
+    }
+
+    public String getRemedy() {
+        return Remedy;
+    }
+
+    public void setRemedy(String remedy) {
+        Remedy = remedy;
+    }
+
+    public String getRetailer() {
+        return Retailer;
+    }
+
+    public void setRetailer(String retailer) {
+        Retailer = retailer;
+    }
+
+    public String getManufacturer() {
+        return Manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        Manufacturer = manufacturer;
+    }
+
+    public String getManufacturerCountries() {
+        return ManufacturerCountries;
+    }
+
+    public void setManufacturerCountries(String manufacturerCountries) {
+        ManufacturerCountries = manufacturerCountries;
+    }
+
+    public String getInjuries() {
+        return Injuries;
+    }
+
+    public void setInjuries(String injuries) {
+        Injuries = injuries;
+    }
+
+    public String getConsumerContact() {
+        return ConsumerContact;
+    }
+
+    public void setConsumerContact(String consumerContact) {
+        ConsumerContact = consumerContact;
     }
 }

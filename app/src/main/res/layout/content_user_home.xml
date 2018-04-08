@@ -10,12 +10,14 @@
     tools:context="com.example.pavanshah.consumesafe.bus.UserHomeActivity"
     tools:showIn="@layout/app_bar_user_home">
     
-    <android.support.v7.widget.RecyclerView
+    <ListView
         android:id="@+id/globalFeeds"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/fab_margin"
+        android:divider="@null"
+        android:dividerHeight="0dp"
         >
-    </android.support.v7.widget.RecyclerView>
+    </ListView>
 
 </LinearLayout>

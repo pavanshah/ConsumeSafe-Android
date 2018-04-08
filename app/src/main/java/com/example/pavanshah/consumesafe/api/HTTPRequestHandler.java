@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
@@ -22,7 +23,7 @@ import org.json.JSONObject;
 public class HTTPRequestHandler extends Application {
     private static HTTPRequestHandler instance;
     private static Context mContext;
-    String fcmPath = "https://fcm.googleapis.com/fcm/send";
+    //String fcmPath = "https://fcm.googleapis.com/fcm/send";
     JSONObject finalResult = new JSONObject();
     private RequestQueue mRequestQueue = null;
     String serverPath = "http://consumesafe-dev.herokuapp.com";
@@ -71,17 +72,14 @@ public class HTTPRequestHandler extends Application {
         mContext = getApplicationContext();
     }
 
-    public void sendHTTPRequest(String customurl, JSONObject body, String type, final VolleyCallback callback) {
-        String url;
-        if (type.equals("firebase")) {
-            url = this.fcmPath;
-        } else {
-            url = this.serverPath + customurl;
-        }
+    public void sendHTTPRequest(int method, String customurl, JSONObject body, final VolleyCallback callback) {
+
+        String url = this.serverPath + customurl;;
         RequestQueue queue = getRequestQueue();
         Log.d("SPECIAL", "url " + url);
         Log.d("SPECIAL", "params " + body);
-        queue.add(new JsonObjectRequest(url, body, new Listener<JSONObject>() {
+
+        queue.add(new JsonObjectRequest(method, url, body, new Listener<JSONObject>() {
             public void onResponse(JSONObject response) {
                 finalResult = response;
                 Log.d("SPECIAL", "result " + finalResult);
@@ -93,8 +91,8 @@ public class HTTPRequestHandler extends Application {
             }
         }, new ErrorListener() {
             public void onErrorResponse(VolleyError error) {
-                Log.d("feeds", "Inside error2" + error);
-                VolleyLog.e("feeds: ", error.getMessage());
+                Log.d("SPECIAL", "Inside error2" + error);
+                VolleyLog.e("SPECIAL", error.getMessage());
                 NetworkResponse response = error.networkResponse;
                 if (response != null) {
                     switch (response.statusCode) {

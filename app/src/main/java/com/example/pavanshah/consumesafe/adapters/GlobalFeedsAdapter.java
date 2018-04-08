@@ -1,75 +1,119 @@
 package com.example.pavanshah.consumesafe.adapters;
 
+
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.pavanshah.consumesafe.R;
+import com.example.pavanshah.consumesafe.bus.DetailsActivity;
+import com.example.pavanshah.consumesafe.bus.LandingActivity;
+import com.example.pavanshah.consumesafe.bus.LoginActivity;
 import com.example.pavanshah.consumesafe.model.FeedsDetails;
-import com.example.pavanshah.consumesafe.model.SubscriptionDetails;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by pavan on 3/23/2018.
  */
 
-public class GlobalFeedsAdapter extends RecyclerView.Adapter<GlobalFeedsAdapter.FeedsHolder>  {
+public class GlobalFeedsAdapter extends BaseAdapter {
 
-    private List<FeedsDetails> feedsList;
+    private static LayoutInflater inflater=null;
 
-    public GlobalFeedsAdapter(List<FeedsDetails> feedsList) {
-        this.feedsList = feedsList;
+    ArrayList<FeedsDetails> resultList = new ArrayList<>();
+
+    Context context;
+
+    public GlobalFeedsAdapter(Context context) {
+
+        this.context = context;
+        inflater = ( LayoutInflater )context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+
+    public GlobalFeedsAdapter(Context context,  ArrayList<FeedsDetails> arrayList) {
+
+        this.context=context;
+        resultList=arrayList;
+        inflater = ( LayoutInflater )context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    public FeedsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.
-                from(parent.getContext()).
-                inflate(R.layout.list_feeds, parent, false);
-
-        return new FeedsHolder(itemView);
+    public int getCount() {
+        return resultList.size();
     }
 
     @Override
-    public void onBindViewHolder(FeedsHolder holder, int i) {
-
-        FeedsDetails feedsDetails = feedsList.get(i);
-        Picasso.with(holder.itemView.getContext()).load(feedsDetails.getImageURL()).resize(100, 100).into(FeedsHolder.ProductImage);
-        FeedsHolder.ProductName.setText(feedsDetails.getProductName());
-        FeedsHolder.NewsTitle.setText(feedsDetails.getNewsTitle());
-
+    public Object getItem(int i) {
+        return i;
     }
 
     @Override
-    public int getItemCount() {
-        return feedsList.size();
+    public long getItemId(int i) {
+        return i;
     }
 
-    public static class FeedsHolder extends RecyclerView.ViewHolder {
+    public class FeedsHolder {
 
-        protected static ImageView ProductImage;
-        protected static TextView ProductName;
-        protected static TextView NewsTitle;
+        ImageView ProductImage;
+        TextView ProductName;
+        TextView NewsTitle;
+    }
 
-        public FeedsHolder(View itemView) {
-            super(itemView);
+    public void datasetchanged(ArrayList<FeedsDetails> arrayList) {
 
-            ProductImage =  (ImageView) itemView.findViewById(R.id.ProductImage);
-            ProductName = (TextView) itemView.findViewById(R.id.ProductName);
-            NewsTitle = (TextView) itemView.findViewById(R.id.NewsTitle);
+        resultList = arrayList;
 
-        }
+        Log.d("Product", "Data set changed");
+
+        notifyDataSetChanged();
+
+    }
+
+
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+
+        final GlobalFeedsAdapter.FeedsHolder holder = new GlobalFeedsAdapter.FeedsHolder();
+
+        View rowView;
+
+        rowView = inflater.inflate(R.layout.list_feeds, null);
+
+        holder.ProductImage = (ImageView) rowView.findViewById(R.id.ProductImage);
+
+        holder.ProductName = (TextView) rowView.findViewById(R.id.ProductName);
+
+        holder.NewsTitle = (TextView) rowView.findViewById(R.id.NewsTitle);
+
+        final FeedsDetails feedsDetails = resultList.get(i);
+
+        //Picasso.with(context).load(feedsDetails.getImageURL()).resize(100, 100).into(holder.ProductImage);
+        holder.ProductName.setText(feedsDetails.getProductName());
+        holder.NewsTitle.setText(feedsDetails.getNewsTitle());
+        rowView.setTag(feedsDetails.getRecallID());
+
+        rowView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String RecallID = view.getTag().toString();
+
+                Intent detailsIntent = new Intent(context, DetailsActivity.class);
+                detailsIntent.putExtra("RecallID", RecallID);
+                context.startActivity(detailsIntent);
+            }
+        });
+
+        return rowView;
+
     }
 }

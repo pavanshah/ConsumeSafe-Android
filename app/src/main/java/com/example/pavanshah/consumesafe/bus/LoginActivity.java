@@ -9,8 +9,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.adapters.GlobalFeedsAdapter;
 import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
@@ -52,8 +54,10 @@ public class LoginActivity extends AppCompatActivity {
 
         //All declarations
         Button loginButton = (Button) findViewById(R.id.loginButton);
-        RecyclerView globalFeeds = (RecyclerView) findViewById(R.id.globalFeeds);
-
+        ListView globalFeeds = (ListView) findViewById(R.id.globalFeeds);
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser activeUser = mFirebaseAuth.getCurrentUser();
+        loginButton.setVisibility(activeUser == null ? View.VISIBLE : View.GONE);
 
         //All listeners
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -75,16 +79,11 @@ public class LoginActivity extends AppCompatActivity {
 
         final JSONObject dataJSON = new JSONObject();
         final ArrayList<FeedsDetails> globalFeedsData = new ArrayList<>();
-        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(globalFeedsData);;
-        globalFeeds.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(getApplicationContext(), globalFeedsData);
         globalFeeds.setAdapter(globalFeedsAdapter);
-        globalFeeds.setLayoutManager(llm);
-        globalFeeds.setItemAnimator(new DefaultItemAnimator());
 
         HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
-        httpRequestHandler.sendHTTPRequest("/globalFeed/fetch", dataJSON, "consumesafeserver", new HTTPRequestHandler.VolleyCallback() {
+        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/globalFeed/fetch", dataJSON, new HTTPRequestHandler.VolleyCallback() {
 
             @Override
             public void onSuccess(JSONObject jSONObject) throws JSONException {
@@ -98,8 +97,8 @@ public class LoginActivity extends AppCompatActivity {
                     globalFeedsData.add(feedsDetails);
                 }
 
-                globalFeedsAdapter.notifyDataSetChanged();
-                Log.d("feeds", "data set changed");
+                globalFeedsAdapter.datasetchanged(globalFeedsData);
+                Log.d("Product", "data set changed "+globalFeedsData.size());
 
             }
         });
@@ -115,17 +114,8 @@ public class LoginActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                UserDetails userDetailsObject = new UserDetails();
-                userDetailsObject.setDisplayName(user.getDisplayName());
-                userDetailsObject.setEmail(user.getEmail());
-                userDetailsObject.setPhoneNumber(user.getPhoneNumber());
-                userDetailsObject.setPhotoUrl(user.getPhotoUrl());
-
                 //Subscribe to global feeds
                 FirebaseMessaging.getInstance().subscribeToTopic("Global");
-
-                Log.d("PAVAN", "UserDetails Object "+ userDetailsObject.toString());
 
                 Intent intent = new Intent(getApplicationContext(), UserHomeActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
