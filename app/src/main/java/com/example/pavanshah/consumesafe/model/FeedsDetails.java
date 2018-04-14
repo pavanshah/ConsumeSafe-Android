@@ -13,8 +13,7 @@ import java.util.Date;
 public class FeedsDetails {
 
     private String RecallID;
-    //private String ImageURL;
-    //private String[] ImageURLS;
+    private ImageURL[] ImageURL;
     private String ProductName;
     private String NewsTitle;
     private String NewsBody;
@@ -32,12 +31,11 @@ public class FeedsDetails {
 
     }
 
-    public FeedsDetails(String RecallID, String ProductName, String NewsTitle,
+    public FeedsDetails(String RecallID, ImageURL[] ImageURL, String ProductName, String NewsTitle,
                         String NewsBody, String NewsURL, String RecallDate, String Remedy, String Retailer, String Manufacturer,
                         String ManufacturerCountries, String Injuries, String ConsumerContact) {
         RecallID = RecallID;
-        //ImageURL = ImageURL;
-        //ImageURLS = ImageURLS;
+        ImageURL = ImageURL;
         ProductName = ProductName;
         NewsTitle = NewsTitle;
         NewsBody = NewsBody;
@@ -58,14 +56,6 @@ public class FeedsDetails {
     public void setRecallID(String recallID) {
         RecallID = recallID;
     }
-
-    /*public String getImageURL() {
-        return ImageURL;
-    }
-
-    public void setImageURL(String imageURL) {
-        ImageURL = imageURL;
-    }*/
 
     public String getProductName() {
         return ProductName;
@@ -107,13 +97,13 @@ public class FeedsDetails {
         RecallDate = recallDate;
     }
 
-    /*public String[] getImageURLS() {
-        return ImageURLS;
+    public com.example.pavanshah.consumesafe.model.ImageURL[] getImageURL() {
+        return ImageURL;
     }
 
-    public void setImageURLS(String[] imageURLS) {
-        ImageURLS = imageURLS;
-    }*/
+    public void setImageURL(com.example.pavanshah.consumesafe.model.ImageURL[] imageURL) {
+        ImageURL = imageURL;
+    }
 
     public String getHazard() {
         return Hazard;

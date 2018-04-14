@@ -6,6 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="15dp"
     tools:context="com.example.pavanshah.consumesafe.bus.SubscriptionsActivity">
 
     <TextView
@@ -29,5 +30,14 @@
         android:dividerHeight="0dp"
         >
     </ListView>
+
+    <Button
+        android:id="@+id/saveChanges"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Save Changes"
+        android:backgroundTint="@color/colorPrimary"
+        />
 
 </RelativeLayout>

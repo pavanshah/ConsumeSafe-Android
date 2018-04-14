@@ -41,7 +41,7 @@ public class SubscriptionAdapter extends BaseAdapter  {
     public SubscriptionAdapter(Context context,  HashMap<String, Boolean> subscriptions) {
         this.context=context;
 
-        resultList.clear();
+        /*resultList.clear();
 
         Iterator it = subscriptions.entrySet().iterator();
         while (it.hasNext()) {
@@ -51,7 +51,7 @@ public class SubscriptionAdapter extends BaseAdapter  {
             SubscriptionDetails subscriptionDetails = new SubscriptionDetails(pair.getKey().toString(), (Boolean) pair.getValue());
             resultList.add(subscriptionDetails);
             it.remove(); // avoids a ConcurrentModificationException
-        }
+        }*/
 
         inflater = ( LayoutInflater )context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -118,9 +118,11 @@ public class SubscriptionAdapter extends BaseAdapter  {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 int index = (int) compoundButton.getTag();
+                Log.d("index", "index "+index+" resultList "+resultList);
                 SubscriptionDetails subscriptionDetails = resultList.get(index);
                 subscriptionDetails.setSubscribed(b);
-                resultList.add(index, subscriptionDetails);
+
+                resultList.set(index, subscriptionDetails);
             }
         });
 

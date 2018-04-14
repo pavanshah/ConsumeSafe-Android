@@ -20,6 +20,7 @@ import com.example.pavanshah.consumesafe.model.FeedsDetails;
 import com.example.pavanshah.consumesafe.model.UserDetails;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.common.SignInButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -38,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mFirebaseAuth;
     private static final int RC_SIGN_IN = 123;
+    FirebaseUser activeUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +55,11 @@ public class LoginActivity extends AppCompatActivity {
         );
 
         //All declarations
-        Button loginButton = (Button) findViewById(R.id.loginButton);
+        SignInButton loginButton = findViewById(R.id.loginButton);
+        loginButton.setSize(SignInButton.SIZE_WIDE);
         ListView globalFeeds = (ListView) findViewById(R.id.globalFeeds);
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser activeUser = mFirebaseAuth.getCurrentUser();
+        activeUser = mFirebaseAuth.getCurrentUser();
         loginButton.setVisibility(activeUser == null ? View.VISIBLE : View.GONE);
 
         //All listeners
@@ -99,7 +102,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 globalFeedsAdapter.datasetchanged(globalFeedsData);
                 Log.d("Product", "data set changed "+globalFeedsData.size());
-
             }
         });
     }
@@ -112,10 +114,28 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
+            // Successfully signed in
             if (resultCode == RESULT_OK) {
-                // Successfully signed in
-                //Subscribe to global feeds
-                FirebaseMessaging.getInstance().subscribeToTopic("Global");
+
+                //check if user already exists in database
+                JSONObject dataJSON = new JSONObject();
+                JSONObject userJSON = new JSONObject();
+                try {
+                    userJSON.put("email", response.getEmail());
+                    dataJSON.put("user", userJSON);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+                httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/user/authenticate", dataJSON, new HTTPRequestHandler.VolleyCallback() {
+
+                    @Override
+                    public void onSuccess(JSONObject jSONObject) throws JSONException {
+
+                        FirebaseMessaging.getInstance().subscribeToTopic("Global");
+                    }
+                });
 
                 Intent intent = new Intent(getApplicationContext(), UserHomeActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

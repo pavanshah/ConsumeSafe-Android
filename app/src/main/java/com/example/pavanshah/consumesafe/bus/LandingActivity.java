@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -26,6 +27,14 @@ public class LandingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing);
+
+        Intent firebaseIntent = getIntent();
+
+        if(firebaseIntent.getExtras() != null)
+        {
+            String firebaseMessage = firebaseIntent.getExtras().toString();
+            Log.d("FCM", "Message "+firebaseMessage);
+        }
 
         consumeSafeTV = (TextView) findViewById(R.id.consumesafe_textView);
         textView = (TextView) findViewById(R.id.landing_textView);
