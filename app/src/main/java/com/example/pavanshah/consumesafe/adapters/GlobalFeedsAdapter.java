@@ -16,6 +16,7 @@ import com.example.pavanshah.consumesafe.bus.DetailsActivity;
 import com.example.pavanshah.consumesafe.bus.LandingActivity;
 import com.example.pavanshah.consumesafe.bus.LoginActivity;
 import com.example.pavanshah.consumesafe.model.FeedsDetails;
+import com.example.pavanshah.consumesafe.model.ImageURL;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -96,7 +97,9 @@ public class GlobalFeedsAdapter extends BaseAdapter {
 
         final FeedsDetails feedsDetails = resultList.get(i);
 
-        //Picasso.with(context).load(feedsDetails.getImageURL()).resize(100, 100).into(holder.ProductImage);
+        ImageURL[] imageURL = feedsDetails.getImageURL();
+
+        Picasso.with(context).load(imageURL[0].getURL()).resize(100, 100).into(holder.ProductImage);
         holder.ProductName.setText(feedsDetails.getProductName());
         holder.NewsTitle.setText(feedsDetails.getNewsTitle());
         rowView.setTag(feedsDetails.getRecallID());

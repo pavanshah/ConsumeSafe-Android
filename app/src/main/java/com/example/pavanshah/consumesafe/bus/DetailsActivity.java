@@ -11,16 +11,20 @@ import com.android.volley.Request;
 import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
 import com.example.pavanshah.consumesafe.model.FeedsDetails;
+import com.example.pavanshah.consumesafe.model.ImageURL;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class DetailsActivity extends AppCompatActivity {
 
-    int[] sampleImages = {R.mipmap.ic_launcher, R.mipmap.launcher, R.mipmap.ic_launcher_round};
+    ArrayList<String> sampleImages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +36,7 @@ public class DetailsActivity extends AppCompatActivity {
         final TextView newsTitle = (TextView) findViewById(R.id.newsTitle);
         final TextView newsBody = (TextView) findViewById(R.id.newsBody);
         final TextView recallDate = (TextView) findViewById(R.id.recallDate);
-        CarouselView carouselView = (CarouselView) findViewById(R.id.carouselView);
-        carouselView.setPageCount(sampleImages.length);
+        final CarouselView carouselView = (CarouselView) findViewById(R.id.carouselView);
         carouselView.setImageListener(imageListener);
         final TextView hazard = (TextView) findViewById(R.id.hazard);
         final TextView remedy = (TextView) findViewById(R.id.remedy);
@@ -41,6 +44,7 @@ public class DetailsActivity extends AppCompatActivity {
         final TextView manufacturer = (TextView) findViewById(R.id.manufacturer);
         final TextView manufacturerCountries  = (TextView) findViewById(R.id.manufacturerCountries);
         final TextView consumerContact = (TextView) findViewById(R.id.consumerContact);
+        sampleImages = new ArrayList<String>();
 
         Intent intent = getIntent();
         String RecallID = intent.getStringExtra("RecallID");
@@ -63,6 +67,14 @@ public class DetailsActivity extends AppCompatActivity {
                 Log.d("Details", "name "+feedsDetails.getProductName());
                 Log.d("Details", "Remedy "+feedsDetails.getRemedy());
 
+                ImageURL[] imageURL = feedsDetails.getImageURL();
+
+                for(int i = 0 ; i < imageURL.length ; i++)
+                {
+                    sampleImages.add(imageURL[i].getURL());
+                }
+
+                carouselView.setPageCount(sampleImages.size());
                 productName.setText(feedsDetails.getProductName());
                 newsTitle.setText(feedsDetails.getNewsTitle());
                 newsBody.setText(feedsDetails.getNewsBody());
@@ -82,7 +94,8 @@ public class DetailsActivity extends AppCompatActivity {
     ImageListener imageListener = new ImageListener() {
         @Override
         public void setImageForPosition(int position, ImageView imageView) {
-            imageView.setImageResource(sampleImages[position]);
+            //imageView.setImageResource();
+            Picasso.with(getApplicationContext()).load(sampleImages.get(position)).into(imageView);
         }
     };
 

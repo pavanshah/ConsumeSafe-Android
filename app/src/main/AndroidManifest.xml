@@ -36,13 +36,35 @@
             android:name=".bus.FeatureActivity"
             android:label="@string/title_activity_feature"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".bus.LoginActivity" />
+        <activity
+            android:name=".bus.LoginActivity"
+            android:label="Global Recalls"
+            />
         <activity
             android:name=".bus.UserHomeActivity"
-            android:label="@string/title_activity_user_home"
+            android:label="My Home"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".bus.SubscriptionsActivity" />
-        <activity android:name=".bus.DetailsActivity"></activity>
+        <activity
+            android:name=".bus.SubscriptionsActivity"
+            android:label="My Subscriptions"
+            />
+        <activity android:name=".bus.DetailsActivity"
+            android:label="Product Details"
+            />
+        <activity android:name=".bus.ScanActivity"
+            android:label="Register Your Purchases"
+            />
+        <activity android:name=".bus.ReceiptAnalysisActivity"
+            android:label="Receipt Analysis"
+            >
+        </activity>
+
+        <service
+            android:name=".firebase.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

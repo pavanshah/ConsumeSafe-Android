@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.adapters.GlobalFeedsAdapter;
+import com.example.pavanshah.consumesafe.adapters.SubscriptionAdapter;
 import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
 import com.example.pavanshah.consumesafe.model.FeedsDetails;
 import com.example.pavanshah.consumesafe.model.UserDetails;
@@ -57,14 +58,12 @@ public class UserHomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //Global declarations
-    private String mCurrentPhotoPath;
-    private int IMAGE_SUCCESS_CODE = 111;
-    private int PICK_IMAGE_CODE = 1;
-    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-    ProgressDialog progressDialog;
     UserDetails userDetails;
     HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
     HashMap<String, Boolean> subscriptions;
+    HashMap<String, String> firebaseLabels;
+    ListView categorizedFeeds;
+    FirebaseUser activeUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,20 +82,21 @@ public class UserHomeActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //all declarations
-        FloatingActionButton cameraButton = (FloatingActionButton) findViewById(R.id.cameraButton);
-        //Button galleryButton = (Button) findViewById(R.id.galleryButton);
-        progressDialog = new ProgressDialog(UserHomeActivity.this);
-
         View header =  navigationView.getHeaderView(0);
         final ImageView userImage = (ImageView) header.findViewById(R.id.userImage);
         final TextView userName = (TextView) header.findViewById(R.id.userName);
         final TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
+        final TextView noSubscriptionsMessage = (TextView) findViewById(R.id.noSubscriptionsMessage);
+        categorizedFeeds = findViewById(R.id.globalFeeds);
+
+        //Default visibility
+        categorizedFeeds.setVisibility(View.GONE);
+        noSubscriptionsMessage.setVisibility(View.GONE);
 
         //Firebase
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser activeUser = mFirebaseAuth.getCurrentUser();
+        activeUser = mFirebaseAuth.getCurrentUser();
         String userEmailId = activeUser.getEmail();
-        userEmailId = "apoorvpmehta@gmail.com";
 
         //Populate all user details
         JSONObject userDetailsJSON = new JSONObject();
@@ -117,89 +117,21 @@ public class UserHomeActivity extends AppCompatActivity
                 userEmail.setText(userDetails.getEmail());
                 Picasso.with(getApplicationContext()).load(userDetails.getPhotoUrl()).into(userImage);
 
-                populateSubscriptions();
-
-
-            }
-        });
-
-        ListView categorizedFeeds = findViewById(R.id.globalFeeds);
-        final ArrayList<FeedsDetails> categorizedFeedsData = new ArrayList<>();
-
-        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(getApplicationContext(), categorizedFeedsData);
-        categorizedFeeds.setAdapter(globalFeedsAdapter);
-
-        //Get personalized feeds of the user
-
-        String userEmailID = activeUser.getEmail();
-        userEmailID = "apoorvpmehta@gmail.com";
-
-        final JSONObject dataJSON = new JSONObject();
-        final JSONObject userJSON = new JSONObject();
-
-        try {
-            userJSON.put("email", userEmailID);
-            dataJSON.put("user", userJSON);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/subscription/categorizedFeeds", dataJSON, new HTTPRequestHandler.VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject jSONObject) throws JSONException {
-
-                JSONArray allRecalls = jSONObject.getJSONArray("result");
-
-                Log.d("feeds", "length "+allRecalls.length());
-                for(int i = 0 ; i < allRecalls.length() ; i++)
+                if(userDetails.getSubscribedCategories() == null)
                 {
-                    JSONObject singleCategory = (JSONObject) allRecalls.get(i);
-                    JSONArray categoryFeeds = singleCategory.getJSONArray("feedResults");
-
-                    for(int j = 0 ; j < categoryFeeds.length() ; j++)
-                    {
-                        FeedsDetails feedsDetails = new Gson().fromJson(categoryFeeds.get(j).toString(), FeedsDetails.class);
-                        categorizedFeedsData.add(feedsDetails);
-                    }
+                    //not subscribed to any categories
+                    categorizedFeeds.setVisibility(View.GONE);
+                    noSubscriptionsMessage.setVisibility(View.VISIBLE);
                 }
-
-                globalFeedsAdapter.datasetchanged(categorizedFeedsData);
-                Log.d("Product", "data set changed "+categorizedFeedsData.size());
-
+                else
+                {
+                    noSubscriptionsMessage.setVisibility(View.GONE);
+                    categorizedFeeds.setVisibility(View.VISIBLE);
+                    populateSubscriptions();
+                    personalizeFeeds();
+                }
             }
         });
-
-
-        //all listeners
-        cameraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                ActivityCompat.requestPermissions(UserHomeActivity.this, new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, 1);
-
-                Log.d("IMAGECAPTURE", "scanReceipt");
-                Intent takePictureIntent = new Intent("android.media.action.IMAGE_CAPTURE");
-                try {
-                    if (createImageFile() != null) {
-                        Uri photoURI = null;
-                        try {
-                            photoURI = FileProvider.getUriForFile(UserHomeActivity.this, "com.example.pavanshah.consumesafe.provider", createImageFile());
-                        } catch (IOException e) {
-                            Log.d("IMAGECAPTURE", "error2");
-                            e.printStackTrace();
-                        }
-                        takePictureIntent.putExtra("output", photoURI);
-                        startActivityForResult(takePictureIntent, IMAGE_SUCCESS_CODE);
-                    }
-                } catch (IOException ex) {
-                    Log.d("IMAGECAPTURE", "error1 ");
-                    ex.printStackTrace();
-                }
-
-            }
-        });
-
 
         /*galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,93 +157,89 @@ public class UserHomeActivity extends AppCompatActivity
                 JSONArray subscriptionArray = jSONObject.getJSONArray("categories");
 
                 subscriptions = new HashMap<>();
+                firebaseLabels = new HashMap<>();
 
                 for(int i = 0 ; i < subscriptionArray.length() ; i++)
                 {
                     JSONObject singleEntry = (JSONObject) subscriptionArray.get(i);
                     subscriptions.put(singleEntry.getString("Category_Name"), false);
+                    firebaseLabels.put(singleEntry.getString("Category_Name"), singleEntry.getString("FirebaseLabel"));
                 }
 
-                String[] mySubscriptions = userDetails.getSubscribedCategories();
-
-                for(int j = 0 ; j < mySubscriptions.length ; j++)
+                if(userDetails.getSubscribedCategories() != null)
                 {
-                    subscriptions.put(mySubscriptions[j], true);
+                    String[] mySubscriptions = userDetails.getSubscribedCategories();
+
+                    for(int j = 0 ; j < mySubscriptions.length ; j++)
+                    {
+                        subscriptions.put(mySubscriptions[j], true);
+                    }
+
+                    Log.d("Subscribe", "My subscriptions "+subscriptions.toString());
                 }
 
-                Log.d("Subscribe", "My subscriptions "+subscriptions.toString());
+                SubscriptionAdapter subscriptionAdapter = new SubscriptionAdapter(getApplicationContext());
+                subscriptionAdapter.datasetchanged(subscriptions);
             }
         });
     }
 
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                if (grantResults.length <= 0 || grantResults[0] != 0) {
-                    Toast.makeText(this, "Permission denied to Read/Write your External storage", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
-                return;
-            default:
-                return;
+    public void personalizeFeeds(){
+        //fetch categorized feeds
+        final ArrayList<FeedsDetails> categorizedFeedsData = new ArrayList<>();
+        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(getApplicationContext(), categorizedFeedsData);
+        categorizedFeeds.setAdapter(globalFeedsAdapter);
+
+        String userEmailID = activeUser.getEmail();
+
+        final JSONObject dataJSON1 = new JSONObject();
+        final JSONObject userJSON = new JSONObject();
+
+        try {
+            userJSON.put("email", userEmailID);
+            dataJSON1.put("user", userJSON);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-    }
 
-    private File createImageFile() throws IOException {
-        Log.d("IMAGECAPTURE", "createFile");
-        File image = File.createTempFile("JPEG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + "_", ".jpg", new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera"));
-        this.mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
-    }
+        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/subscription/categorizedFeeds", dataJSON1, new HTTPRequestHandler.VolleyCallback() {
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+            @Override
+            public void onSuccess(JSONObject jSONObject) throws JSONException {
 
+                JSONArray allRecalls = jSONObject.getJSONArray("result");
 
-        if (requestCode == this.IMAGE_SUCCESS_CODE && resultCode == -1) {
-            progressDialog.setTitle("Image is Uploading...");
-            progressDialog.show();
-            Toast.makeText(getApplicationContext(), "Capture success", Toast.LENGTH_SHORT).show();
-            final Uri imageUri = Uri.parse(this.mCurrentPhotoPath);
-            File file = new File(imageUri.getPath());
+                Log.d("feeds", "length "+allRecalls.length());
+                for(int i = 0 ; i < allRecalls.length() ; i++)
+                {
+                    JSONObject singleCategory = (JSONObject) allRecalls.get(i);
+                    JSONArray categoryFeeds = singleCategory.getJSONArray("feedResults");
 
-            this.storageRef.child("scannedReceipts").child(imageUri.getLastPathSegment()).putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Uri imageURL = taskSnapshot.getDownloadUrl();
-                    progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(), "Upload successful", Toast.LENGTH_SHORT).show();
+                    for(int j = 0 ; j < categoryFeeds.length() ; j++)
+                    {
+                        JSONObject singleObject = (JSONObject) categoryFeeds.get(j);
 
-                    JSONObject dataJSON = new JSONObject();
+                        //Replacing string object with JSON array
+                        String url = singleObject.getString("ImageURL");
+                        JSONArray ImageURL = new JSONArray();
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("URL", url);
+                        ImageURL.put(jsonObject);
+                        singleObject.put("ImageURL", ImageURL);
 
-                    final String url = imageURL.toString();
+                        FeedsDetails feedsDetails = new Gson().fromJson(categoryFeeds.get(j).toString(), FeedsDetails.class);
+                        categorizedFeedsData.add(feedsDetails);
 
-                    try {
-                        dataJSON.put("url", url);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
-
-                    //Sending URL to server
-                    httpRequestHandler.sendHTTPRequest(Request.Method.POST, "/api/storage/scannedImg", dataJSON, new HTTPRequestHandler.VolleyCallback(){
-
-                        @Override
-                        public void onSuccess(JSONObject jSONObject) throws JSONException {
-                            Toast.makeText(getApplicationContext(), "Sent to server successfully", Toast.LENGTH_SHORT).show();
-                        }
-
-                    });
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(getApplicationContext(), "Upload failed", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+
+                globalFeedsAdapter.datasetchanged(categorizedFeedsData);
+                Log.d("Product", "data set changed "+categorizedFeedsData.size());
+
+            }
+        });
     }
-
 
     @Override
     public void onBackPressed() {
@@ -354,6 +282,8 @@ public class UserHomeActivity extends AppCompatActivity
         switch(id)
         {
             case R.id.register_products :
+                Intent registerIntent = new Intent(UserHomeActivity.this, ScanActivity.class);
+                startActivity(registerIntent);
                 break;
 
             case R.id.global_feeds :
@@ -364,6 +294,7 @@ public class UserHomeActivity extends AppCompatActivity
             case R.id.my_subscriptions :
                 Intent subscriptionintent = new Intent(UserHomeActivity.this, SubscriptionsActivity.class);
                 subscriptionintent.putExtra("subscriptions", subscriptions);
+                subscriptionintent.putExtra("firebaseLabels", firebaseLabels);
                 startActivity(subscriptionintent);
                 break;
 
