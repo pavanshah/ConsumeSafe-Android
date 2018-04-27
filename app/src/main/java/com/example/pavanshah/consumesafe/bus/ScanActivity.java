@@ -25,6 +25,8 @@ import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
 import com.example.pavanshah.consumesafe.model.ReceiptDetails;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -70,7 +72,7 @@ public class ScanActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.adddialog);
 
         // set the custom dialog components - text, image and button
-        EditText productNameET = (EditText) dialog.findViewById(R.id.productNameET);
+        final EditText productNameET = (EditText) dialog.findViewById(R.id.productNameET);
         ProductCategory = (Spinner) dialog.findViewById(R.id.ProductCategory);
         Button confirmButton = (Button) dialog.findViewById(R.id.confirmAdd);
         Button cancelButton = (Button) dialog.findViewById(R.id.cancelAdd);
@@ -79,7 +81,57 @@ public class ScanActivity extends AppCompatActivity {
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.dismiss();
+
+                String productName = productNameET.getText().toString();
+                String productCategory = ProductCategory.getSelectedItem().toString();
+                String upcApi = null;
+                String image = "https://firebasestorage.googleapis.com/v0/b/consumesafefirebase.appspot.com/o/scannedReceipts%2Fimage-not-available-icon.jpg?alt=media&token=21184842-fb51-42c7-bc46-751bd9d3ae23";
+
+                ReceiptDetails receiptDetails = new ReceiptDetails(upcApi, productName, image, productCategory);
+
+                JSONObject finalObject = new JSONObject();
+                FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+                String userEmailId = mFirebaseAuth.getCurrentUser().getEmail();
+                String deviceId = FirebaseInstanceId.getInstance().getToken();
+
+                JSONArray productArray = new JSONArray();
+                JSONObject jsonObject = new JSONObject();
+
+                try {
+                    jsonObject.put("upcApi", receiptDetails.getUpcApi());
+                    jsonObject.put("productName", receiptDetails.getProductName());
+                    jsonObject.put("image", receiptDetails.getImage());
+                    jsonObject.put("productCategory", receiptDetails.getProductCategory());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                productArray.put(jsonObject);
+
+                try {
+                    finalObject.put("email", userEmailId);
+                    finalObject.put("deviceId", deviceId);
+                    finalObject.put("productArray", productArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                //sending to server
+                Log.d("CHECK", "finalObject "+finalObject.toString());
+
+                HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+                httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/monitorProduct/saveUserProduct", finalObject, new HTTPRequestHandler.VolleyCallback() {
+
+                    @Override
+                    public void onSuccess(JSONObject jSONObject) throws JSONException {
+                        Log.d("CHECK", "final status "+jSONObject.getString("status")+" Message "+jSONObject.getString("Message"));
+
+                        Toast.makeText(getApplicationContext(), "Product saved successfully", Toast.LENGTH_SHORT).show();
+                        productNameET.setText("");
+                        dialog.dismiss();
+
+                    }
+                });
             }
         });
 
@@ -105,15 +157,21 @@ public class ScanActivity extends AppCompatActivity {
                         Uri photoURI = null;
                         try {
                             photoURI = FileProvider.getUriForFile(ScanActivity.this, "com.example.pavanshah.consumesafe.provider", createImageFile());
+                            takePictureIntent.putExtra("output", photoURI);
+                            Log.d("IMAGECAPTURE", "here2 "+photoURI);
+                            startActivityForResult(takePictureIntent, IMAGE_SUCCESS_CODE);
                         } catch (IOException e) {
                             Log.d("IMAGECAPTURE", "error2");
                             e.printStackTrace();
                         }
-                        takePictureIntent.putExtra("output", photoURI);
-                        startActivityForResult(takePictureIntent, IMAGE_SUCCESS_CODE);
+                        Log.d("IMAGECAPTURE", "here1");
+                    }
+                    else
+                    {
+                        Log.d("IMAGECAPTURE", "createImageFile returned null");
                     }
                 } catch (IOException ex) {
-                    Log.d("IMAGECAPTURE", "error1 ");
+                    Log.d("IMAGECAPTURE", "error1 "+ex.getMessage());
                     ex.printStackTrace();
                 }
 
@@ -149,11 +207,17 @@ public class ScanActivity extends AppCompatActivity {
         Log.d("IMAGECAPTURE", "createFile");
         File image = File.createTempFile("JPEG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + "_", ".jpg", new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera"));
         this.mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        Log.d("IMAGECAPTURE", "image "+image);
+        Log.d("IMAGECAPTURE", "image path "+image.getAbsolutePath());
         return image;
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("IMAGECAPTURE", "Image scanned");
+
         super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d("IMAGECAPTURE", "Image scanned really");
 
 
         if (requestCode == this.IMAGE_SUCCESS_CODE && resultCode == -1) {
@@ -192,16 +256,33 @@ public class ScanActivity extends AppCompatActivity {
                             JSONArray result = jSONObject.getJSONArray("result");
                             ArrayList<ReceiptDetails> receiptDetailsArray = new ArrayList<>();
 
-                            for(int i = 0 ; i < result.length() ; i++)
-                            {
-                                ReceiptDetails receiptDetails = new Gson().fromJson(result.get(i).toString(), ReceiptDetails.class);
-                                receiptDetailsArray.add(receiptDetails);
-                            }
+                            Log.d("Receipt", "Array received "+jSONObject.toString());
 
-                            Intent intent = new Intent(ScanActivity.this, ReceiptAnalysisActivity.class);
-                            intent.putExtra("result", receiptDetailsArray);
-                            intent.putExtra("subscriptions", subscriptionCategories);
-                            startActivity(intent);
+                            if(result.length() == 0)
+                            {
+                                Toast.makeText(getApplicationContext(), "No products found. Please add your products manually.", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+                                for(int i = 0 ; i < result.length() ; i++)
+                                {
+                                    JSONObject singleObject = (JSONObject) result.get(i);
+                                    singleObject.put("productCategory", "GLOBAL");
+
+                                    Log.d("Receipt", "Single object "+singleObject.toString());
+
+                                    ReceiptDetails receiptDetails = new Gson().fromJson(singleObject.toString(), ReceiptDetails.class);
+                                    receiptDetailsArray.add(receiptDetails);
+                                }
+
+                                Log.d("Receipt", "ReceiptDetails name "+receiptDetailsArray.get(0).getProductName()+"Category "+receiptDetailsArray.get(0).getProductCategory());
+
+                                Intent intent = new Intent(ScanActivity.this, ReceiptAnalysisActivity.class);
+                                intent.putExtra("result", receiptDetailsArray);
+                                intent.putExtra("subscriptions", subscriptionCategories);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
                         }
 
                     });
@@ -212,6 +293,9 @@ public class ScanActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Upload failed", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+        else {
+            Log.d("IMAGECAPTURE", "requestCode "+requestCode+" resultCode "+resultCode);
         }
     }
 

@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,9 @@ import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
 import com.example.pavanshah.consumesafe.model.FeedsDetails;
 import com.example.pavanshah.consumesafe.model.UserDetails;
 import com.firebase.ui.auth.data.model.User;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -88,10 +92,12 @@ public class UserHomeActivity extends AppCompatActivity
         final TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
         final TextView noSubscriptionsMessage = (TextView) findViewById(R.id.noSubscriptionsMessage);
         categorizedFeeds = findViewById(R.id.globalFeeds);
+        final ProgressBar loading_spinner = (ProgressBar) findViewById(R.id.loading_spinner);
 
         //Default visibility
         categorizedFeeds.setVisibility(View.GONE);
         noSubscriptionsMessage.setVisibility(View.GONE);
+        loading_spinner.setVisibility(View.VISIBLE);
 
         //Firebase
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
@@ -116,19 +122,21 @@ public class UserHomeActivity extends AppCompatActivity
                 userName.setText(userDetails.getDisplayName());
                 userEmail.setText(userDetails.getEmail());
                 Picasso.with(getApplicationContext()).load(userDetails.getPhotoUrl()).into(userImage);
+                loading_spinner.setVisibility(View.GONE);
 
                 if(userDetails.getSubscribedCategories() == null)
                 {
                     //not subscribed to any categories
                     categorizedFeeds.setVisibility(View.GONE);
                     noSubscriptionsMessage.setVisibility(View.VISIBLE);
+                    populateSubscriptions();
                 }
                 else
                 {
                     noSubscriptionsMessage.setVisibility(View.GONE);
                     categorizedFeeds.setVisibility(View.VISIBLE);
                     populateSubscriptions();
-                    personalizeFeeds();
+                      personalizeFeeds();
                 }
             }
         });
@@ -302,9 +310,8 @@ public class UserHomeActivity extends AppCompatActivity
                 break;
 
             case R.id.logout :
-                FirebaseAuth.getInstance().signOut();
-                Toast.makeText(getApplicationContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                Intent logout = new Intent(UserHomeActivity.this, LandingActivity.class);
+                Intent logout = new Intent(UserHomeActivity.this, LoginActivity.class);
+                logout.putExtra("logout", "logout");
                 startActivity(logout);
 
             default :

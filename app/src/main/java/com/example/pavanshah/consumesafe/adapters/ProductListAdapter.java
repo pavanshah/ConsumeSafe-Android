@@ -22,6 +22,7 @@ import com.example.pavanshah.consumesafe.model.ReceiptDetails;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by pavan on 3/23/2018.
@@ -31,9 +32,11 @@ public class ProductListAdapter extends BaseAdapter {
 
     private static LayoutInflater inflater=null;
 
-    ArrayList<ReceiptDetails> resultList = new ArrayList<>();
+    static ArrayList<ReceiptDetails> resultList = new ArrayList<>();
 
     ArrayList<String> subscriptionCategories = new ArrayList<>();
+
+    HashMap<Integer, Integer> mapRowSpinnerPos = new HashMap<>();
 
     Context context;
 
@@ -77,17 +80,22 @@ public class ProductListAdapter extends BaseAdapter {
     public void datasetchanged(ArrayList<ReceiptDetails> arrayList, ArrayList<String> subscriptionCategories) {
 
         resultList = arrayList;
-
         this.subscriptionCategories = subscriptionCategories;
-
         Log.d("Product", "Data set changed");
+        notifyDataSetChanged();
+    }
 
+
+    public void itemAdded(ReceiptDetails newItem) {
+
+        resultList.add(newItem);
+        Log.d("Receipt", "new item added");
         notifyDataSetChanged();
     }
 
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, ViewGroup viewGroup) {
 
         final ProductListAdapter.FeedsHolder holder = new ProductListAdapter.FeedsHolder();
 
@@ -110,26 +118,31 @@ public class ProductListAdapter extends BaseAdapter {
 
         String [] paths = subscriptionCategories.toArray(new String[subscriptionCategories.size()]);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, paths);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, paths);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         holder.Category.setAdapter(adapter);
+        holder.Category.setTag(i);
+
+        if (mapRowSpinnerPos.containsKey(i)) {
+            holder.Category.setSelection(mapRowSpinnerPos.get(i));
+        }
 
         holder.Category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
 
-                switch (position) {
-                    case 0:
-                        // Whatever you want to happen when the first item gets selected
-                        break;
-                    case 1:
-                        // Whatever you want to happen when the second item gets selected
-                        break;
-                    case 2:
-                        // Whatever you want to happen when the thrid item gets selected
-                        break;
-                }
+                int index = (int) adapterView.getTag();
 
+                Log.d("Receipt", "on update index "+index);
+
+                ReceiptDetails receiptDetails1 = resultList.get(index);
+                receiptDetails1.setProductCategory(adapterView.getSelectedItem().toString());
+
+                mapRowSpinnerPos.put(index, position);
+
+                Log.d("Receipt", "on update receiptdetails "+receiptDetails1.getProductName()+" "+receiptDetails1.getProductCategory());
+
+                resultList.set(index, receiptDetails1);
             }
 
             @Override
@@ -139,5 +152,9 @@ public class ProductListAdapter extends BaseAdapter {
         });
 
         return rowView;
+    }
+
+    public static ArrayList<ReceiptDetails> getResultList() {
+        return resultList;
     }
 }

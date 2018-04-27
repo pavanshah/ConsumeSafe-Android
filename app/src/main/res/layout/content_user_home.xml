@@ -11,6 +11,14 @@
     tools:context="com.example.pavanshah.consumesafe.bus.UserHomeActivity"
     tools:showIn="@layout/app_bar_user_home">
 
+
+    <ProgressBar
+        android:id="@+id/loading_spinner"
+        style="?android:progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
     <TextView
         android:id="@+id/noSubscriptionsMessage"
         android:layout_width="match_parent"

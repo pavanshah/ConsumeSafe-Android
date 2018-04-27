@@ -99,7 +99,14 @@ public class GlobalFeedsAdapter extends BaseAdapter {
 
         ImageURL[] imageURL = feedsDetails.getImageURL();
 
-        Picasso.with(context).load(imageURL[0].getURL()).resize(100, 100).into(holder.ProductImage);
+        if(imageURL[0].getURL().isEmpty())
+        {
+            Picasso.with(context).load("https://firebasestorage.googleapis.com/v0/b/consumesafefirebase.appspot.com/o/scannedReceipts%2Fimage-not-available-icon.jpg?alt=media&token=21184842-fb51-42c7-bc46-751bd9d3ae23").resize(100, 100).into(holder.ProductImage);
+        }
+        else
+        {
+            Picasso.with(context).load(imageURL[0].getURL()).resize(100, 100).into(holder.ProductImage);
+        }
         holder.ProductName.setText(feedsDetails.getProductName());
         holder.NewsTitle.setText(feedsDetails.getNewsTitle());
         rowView.setTag(feedsDetails.getRecallID());

@@ -15,7 +15,7 @@ public class UserDetails {
     private String PhotoUrl;
     private String ProviderId;
     private String[] SubscribedCategories;
-    private String PurchasedItems;
+    //private String[] PurchasedItems;
     private String created_at;
     private String updated_at;
 
@@ -24,7 +24,7 @@ public class UserDetails {
     }
 
     public UserDetails(String DisplayName, String Email, String FirstName, String LastName, String PhotoUrl,
-                       String ProviderId, String[] SubscribedCategories, String PurchasedItems, String created_at,
+                       String ProviderId, String[] SubscribedCategories, String created_at,
                        String updated_at) {
         this.DisplayName = DisplayName;
         this.Email = Email;
@@ -33,7 +33,7 @@ public class UserDetails {
         this.PhotoUrl = PhotoUrl;
         this.ProviderId = ProviderId;
         this.SubscribedCategories = SubscribedCategories;
-        this.PurchasedItems = PurchasedItems;
+        //this.PurchasedItems = PurchasedItems;
         this.created_at = created_at;
         this.updated_at = updated_at;
     }
@@ -94,13 +94,13 @@ public class UserDetails {
         SubscribedCategories = subscribedCategories;
     }
 
-    public String getPurchasedItems() {
+    /*public String[] getPurchasedItems() {
         return PurchasedItems;
     }
 
-    public void setPurchasedItems(String purchasedItems) {
+    public void setPurchasedItems(String[] purchasedItems) {
         PurchasedItems = purchasedItems;
-    }
+    }*/
 
     public String getCreated_at() {
         return created_at;
