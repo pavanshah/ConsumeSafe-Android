@@ -22,6 +22,7 @@
         android:id="@+id/productList"
         android:layout_below="@+id/titleReceipt"
         android:layout_width="match_parent"
+        android:divider="@null"
         android:layout_height="wrap_content">
     </ListView>
 

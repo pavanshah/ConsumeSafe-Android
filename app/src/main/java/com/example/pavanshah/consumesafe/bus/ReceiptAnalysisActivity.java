@@ -1,6 +1,7 @@
 package com.example.pavanshah.consumesafe.bus;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -14,12 +15,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.adapters.ProductListAdapter;
 import com.example.pavanshah.consumesafe.api.HTTPRequestHandler;
 import com.example.pavanshah.consumesafe.model.ReceiptDetails;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.JsonParser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +34,8 @@ import java.util.ArrayList;
 
 public class ReceiptAnalysisActivity extends AppCompatActivity {
 
+    ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,10 +44,12 @@ public class ReceiptAnalysisActivity extends AppCompatActivity {
         Intent intent = getIntent();
         final ArrayList<ReceiptDetails> result = (ArrayList<ReceiptDetails>) intent.getSerializableExtra("result");
         final ArrayList<String> subscriptionCategories = (ArrayList<String>) intent.getSerializableExtra("subscriptions");
+        final ProductListAdapter productListAdapter = new ProductListAdapter(getApplicationContext(), result, subscriptionCategories);
 
         //All declarations
         FloatingActionButton addNewProduct = (FloatingActionButton) findViewById(R.id.addNewProduct);
         Button saveProducts = (Button) findViewById(R.id.saveProducts);
+        progressDialog = new ProgressDialog(ReceiptAnalysisActivity.this);
 
         //Define add product dialogbox params
         final Dialog dialog = new Dialog(ReceiptAnalysisActivity.this);
@@ -48,7 +57,7 @@ public class ReceiptAnalysisActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.adddialog);
 
         // set the custom dialog components - text, image and button
-        EditText productNameET = (EditText) dialog.findViewById(R.id.productNameET);
+        final EditText productNameET = (EditText) dialog.findViewById(R.id.productNameET);
         final Spinner ProductCategory = (Spinner) dialog.findViewById(R.id.ProductCategory);
         Button confirmButton = (Button) dialog.findViewById(R.id.confirmAdd);
         Button cancelButton = (Button) dialog.findViewById(R.id.cancelAdd);
@@ -57,6 +66,17 @@ public class ReceiptAnalysisActivity extends AppCompatActivity {
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String productName = productNameET.getText().toString();
+                String productCategory = ProductCategory.getSelectedItem().toString();
+                String upcApi = null;
+                String image = "https://firebasestorage.googleapis.com/v0/b/consumesafefirebase.appspot.com/o/scannedReceipts%2Fimage-not-available-icon.jpg?alt=media&token=21184842-fb51-42c7-bc46-751bd9d3ae23";
+
+                ReceiptDetails receiptDetails = new ReceiptDetails(upcApi, productName, image, productCategory);
+
+                productListAdapter.itemAdded(receiptDetails);
+
+                productNameET.setText("");
+
                 dialog.dismiss();
             }
         });
@@ -73,30 +93,9 @@ public class ReceiptAnalysisActivity extends AppCompatActivity {
         addNewProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 dialog.show();
-
             }
         });
-
-        HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
-
-        //fetch all the categories from server
-        JSONObject dataJSON = new JSONObject();
-        //final ArrayList<String> subscriptionCategories = new ArrayList<>();
-        final ProductListAdapter productListAdapter = new ProductListAdapter(getApplicationContext(), result, subscriptionCategories);
-
-        /*httpRequestHandler.sendHTTPRequest(Request.Method.GET,"/subscription/allCategories", dataJSON, new HTTPRequestHandler.VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject jSONObject) throws JSONException {
-                JSONArray subscriptionArray = jSONObject.getJSONArray("categories");
-
-                for(int i = 0 ; i < subscriptionArray.length() ; i++)
-                {
-                    JSONObject singleEntry = (JSONObject) subscriptionArray.get(i);
-                    subscriptionCategories.add(singleEntry.getString("Category_Name"));
-                }*/
 
                 productListAdapter.datasetchanged(result, subscriptionCategories);
 
@@ -129,10 +128,67 @@ public class ReceiptAnalysisActivity extends AppCompatActivity {
                     }
                 });
 
-         //   }
-       // });
-
         ListView productList = findViewById(R.id.productList);
         productList.setAdapter(productListAdapter);
+
+        saveProducts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                ArrayList<ReceiptDetails> result = ProductListAdapter.getResultList();
+
+                Log.d("Receipt", "before sending "+result);
+
+                JSONObject finalObject = new JSONObject();
+                FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+                String userEmailId = mFirebaseAuth.getCurrentUser().getEmail();
+                String deviceId = FirebaseInstanceId.getInstance().getToken();
+
+                JSONArray productArray = new JSONArray();
+                for (int i = 0 ; i < result.size() ; i++)
+                {
+                    JSONObject tempJSON = new JSONObject();
+                    try {
+                        tempJSON.put("upcApi", result.get(i).getUpcApi());
+                        tempJSON.put("productName", result.get(i).getProductName());
+                        tempJSON.put("image", result.get(i).getImage());
+                        tempJSON.put("productCategory", result.get(i).getProductCategory());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    productArray.put(tempJSON);
+                }
+
+                try {
+                    finalObject.put("email", userEmailId);
+                    finalObject.put("deviceId", deviceId);
+                    finalObject.put("productArray", productArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                //sending to server
+                Log.d("CHECK", "finalObject "+finalObject.toString());
+
+                progressDialog.setTitle("Saving your purchase history...");
+                progressDialog.show();
+
+                HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+                httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/monitorProduct/saveUserProduct", finalObject, new HTTPRequestHandler.VolleyCallback() {
+
+                    @Override
+                    public void onSuccess(JSONObject jSONObject) throws JSONException {
+                        Log.d("CHECK", "final status "+jSONObject.getString("status")+" Message "+jSONObject.getString("Message"));
+                        Toast.makeText(getApplicationContext(), "Products saved successfully", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        Intent intent = new Intent(ReceiptAnalysisActivity.this, UserHomeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                    }
+                });
+            }
+        });
+
     }
 }

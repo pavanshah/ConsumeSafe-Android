@@ -69,9 +69,16 @@ public class DetailsActivity extends AppCompatActivity {
 
                 ImageURL[] imageURL = feedsDetails.getImageURL();
 
-                for(int i = 0 ; i < imageURL.length ; i++)
+                if(imageURL.length == 0)
                 {
-                    sampleImages.add(imageURL[i].getURL());
+                    sampleImages.add("https://firebasestorage.googleapis.com/v0/b/consumesafefirebase.appspot.com/o/scannedReceipts%2Fimage-not-available-icon.jpg?alt=media&token=21184842-fb51-42c7-bc46-751bd9d3ae23");
+                }
+                else
+                {
+                    for(int i = 0 ; i < imageURL.length ; i++)
+                    {
+                        sampleImages.add(imageURL[i].getURL());
+                    }
                 }
 
                 carouselView.setPageCount(sampleImages.size());
@@ -95,7 +102,7 @@ public class DetailsActivity extends AppCompatActivity {
         @Override
         public void setImageForPosition(int position, ImageView imageView) {
             //imageView.setImageResource();
-            Picasso.with(getApplicationContext()).load(sampleImages.get(position)).into(imageView);
+            Picasso.with(getApplicationContext()).load(sampleImages.get(position)).fit().into(imageView);
         }
     };
 

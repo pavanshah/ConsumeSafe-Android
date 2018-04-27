@@ -19,7 +19,7 @@
         android:text="@string/slide_5_dec"
         android:textColor="@android:color/white"
         android:layout_marginTop="12dp"
-        android:textSize="18sp"
+        android:textSize="25sp"
         android:gravity="center_horizontal"
         android:layout_below="@id/slide_5_image"
         android:id="@+id/slide_5_desc"

@@ -10,17 +10,18 @@ public class ReceiptDetails implements java.io.Serializable {
     String upcApi;
     String productName;
     String image;
+    String productCategory;
 
     public ReceiptDetails() {
 
     }
 
-    public ReceiptDetails(String upcApi, String productName, String image) {
+    public ReceiptDetails(String upcApi, String productName, String image, String productCategory) {
 
-        upcApi = upcApi;
-        productName = productName;
-        image = image;
-
+        this.upcApi = upcApi;
+        this.productName = productName;
+        this.image = image;
+        this.productCategory = productCategory;
     }
 
     public String getUpcApi() {
@@ -45,5 +46,13 @@ public class ReceiptDetails implements java.io.Serializable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getProductCategory() {
+        return productCategory;
+    }
+
+    public void setProductCategory(String productCategory) {
+        this.productCategory = productCategory;
     }
 }

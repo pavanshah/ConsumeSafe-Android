@@ -59,6 +59,7 @@ public class LandingActivity extends AppCompatActivity {
                 if(activeUser != null)
                 {
                     intent = new Intent(LandingActivity.this, UserHomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
                 else
                 {
