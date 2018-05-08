@@ -34,19 +34,19 @@ public class FeedsDetails {
     public FeedsDetails(String RecallID, ImageURL[] ImageURL, String ProductName, String NewsTitle,
                         String NewsBody, String NewsURL, String RecallDate, String Remedy, String Retailer, String Manufacturer,
                         String ManufacturerCountries, String Injuries, String ConsumerContact) {
-        RecallID = RecallID;
-        ImageURL = ImageURL;
-        ProductName = ProductName;
-        NewsTitle = NewsTitle;
-        NewsBody = NewsBody;
-        NewsURL = NewsURL;
-        RecallDate = RecallDate;
-        Remedy = Remedy;
-        Retailer = Retailer;
-        Manufacturer = Manufacturer;
-        ManufacturerCountries = ManufacturerCountries;
-        Injuries = Injuries;
-        ConsumerContact = ConsumerContact;
+        this.RecallID = RecallID;
+        this.ImageURL = ImageURL;
+        this.ProductName = ProductName;
+        this.NewsTitle = NewsTitle;
+        this.NewsBody = NewsBody;
+        this.NewsURL = NewsURL;
+        this.RecallDate = RecallDate;
+        this.Remedy = Remedy;
+        this.Retailer = Retailer;
+        this.Manufacturer = Manufacturer;
+        this.ManufacturerCountries = ManufacturerCountries;
+        this.Injuries = Injuries;
+        this.ConsumerContact = ConsumerContact;
     }
 
     public String getRecallID() {

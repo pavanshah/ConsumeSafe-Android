@@ -99,7 +99,10 @@ public class GlobalFeedsAdapter extends BaseAdapter {
 
         ImageURL[] imageURL = feedsDetails.getImageURL();
 
-        if(imageURL[0].getURL().isEmpty())
+        Log.d("PROBLEM", "feeds "+feedsDetails);
+        Log.d("PROBLEM", "imageurl "+imageURL);
+
+        if(imageURL.length == 0)
         {
             Picasso.with(context).load("https://firebasestorage.googleapis.com/v0/b/consumesafefirebase.appspot.com/o/scannedReceipts%2Fimage-not-available-icon.jpg?alt=media&token=21184842-fb51-42c7-bc46-751bd9d3ae23").resize(100, 100).into(holder.ProductImage);
         }

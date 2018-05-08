@@ -14,6 +14,7 @@ import com.example.pavanshah.consumesafe.R;
 import com.example.pavanshah.consumesafe.model.UserDetails;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.messaging.RemoteMessage;
 
 public class LandingActivity extends AppCompatActivity {
 
@@ -29,13 +30,6 @@ public class LandingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_landing);
 
         Intent firebaseIntent = getIntent();
-
-        if(firebaseIntent.getExtras() != null)
-        {
-            String firebaseMessage = firebaseIntent.getExtras().toString();
-            Log.d("FCM", "Message "+firebaseMessage);
-        }
-
         consumeSafeTV = (TextView) findViewById(R.id.consumesafe_textView);
         textView = (TextView) findViewById(R.id.landing_textView);
         imageView = (ImageView) findViewById(R.id.landing_imageView);
@@ -43,33 +37,45 @@ public class LandingActivity extends AppCompatActivity {
         consumeSafeTV.startAnimation(myAnimation);
         textView.startAnimation(myAnimation);
         imageView.startAnimation(myAnimation);
-
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-            }
-            @Override
-            public void onFinish() {
+        if(firebaseIntent.getExtras() != null && firebaseIntent.getExtras().containsKey("RecallID"))
+        {
+            Bundle firebaseMessage = firebaseIntent.getExtras();
+            Log.d("FCM", "Message here "+firebaseMessage.get("RecallID"));
 
-                FirebaseUser activeUser = mFirebaseAuth.getCurrentUser();
-                Intent intent;
-
-                if(activeUser != null)
-                {
-                    intent = new Intent(LandingActivity.this, UserHomeActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            String RecallID = firebaseMessage.get("RecallID").toString();
+            Intent detailsIntent = new Intent(LandingActivity.this, DetailsActivity.class);
+            detailsIntent.putExtra("RecallID", RecallID);
+            startActivity(detailsIntent);
+        }
+        else
+        {
+            CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
                 }
-                else
-                {
-                    intent = new Intent(LandingActivity.this, FeatureActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                }
+                @Override
+                public void onFinish() {
 
-                startActivity(intent);
-            }
-        }.start();
+                    FirebaseUser activeUser = mFirebaseAuth.getCurrentUser();
+                    Intent intent;
+
+                    if(activeUser != null)
+                    {
+                        intent = new Intent(LandingActivity.this, UserHomeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    }
+                    else
+                    {
+                        intent = new Intent(LandingActivity.this, FeatureActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    }
+
+                    startActivity(intent);
+                }
+            }.start();
+        }
 
     }
 }
