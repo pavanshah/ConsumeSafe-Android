@@ -187,67 +187,9 @@ public class LoginActivity extends AppCompatActivity {
 
                 Log.d("login", "Google sign in failed", e);
 
-                // [START_EXCLUDE]
-
-                //updateUI(null);
-
-                // [END_EXCLUDE]
-
             }
 
         }
-
-
-
-        /*if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
-            // Successfully signed in
-            if (resultCode == RESULT_OK) {
-
-                //check if user already exists in database
-                JSONObject dataJSON = new JSONObject();
-                JSONObject userJSON = new JSONObject();
-                JSONArray providerData = new JSONArray();
-                JSONObject singleProvider = new JSONObject();
-
-                try {
-                    userJSON.put("email", response.getEmail());
-                    userJSON.put("displayName", mFirebaseAuth.getCurrentUser().getDisplayName());
-                    userJSON.put("photoURL", mFirebaseAuth.getCurrentUser().getPhotoUrl());
-
-                    singleProvider.put("providerId", mFirebaseAuth.getCurrentUser().getProviderId());
-                    providerData.put(singleProvider);
-
-                    userJSON.put("providerData", providerData);
-                    userJSON.put("deviceID", FirebaseInstanceId.getInstance().getToken());
-
-                    dataJSON.put("user", userJSON);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
-                httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/user/authenticate", dataJSON, new HTTPRequestHandler.VolleyCallback() {
-
-                    @Override
-                    public void onSuccess(JSONObject jSONObject) throws JSONException {
-
-                        Log.d("login", jSONObject.get("success")+" "+jSONObject.get("message"));
-
-                        FirebaseMessaging.getInstance().subscribeToTopic("Global");
-                    }
-                });
-
-                Intent intent = new Intent(getApplicationContext(), UserHomeActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-
-            } else {
-                // Sign in failed, check response for error code
-                Toast.makeText(getApplicationContext(), "Sign in failed", Toast.LENGTH_SHORT).show();
-            }
-        }*/
     }
 
 
@@ -309,9 +251,10 @@ public class LoginActivity extends AppCompatActivity {
 
                                     if(jSONObject.getBoolean("isNewUser"))
                                     {
-                                        FirebaseMessaging.getInstance().subscribeToTopic("Global");
+                                        //FirebaseMessaging.getInstance().subscribeToTopic("Global");
                                     }
 
+                                    FirebaseMessaging.getInstance().subscribeToTopic("Global");
                                     Intent intent = new Intent(getApplicationContext(), UserHomeActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(intent);

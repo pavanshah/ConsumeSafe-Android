@@ -238,7 +238,6 @@ public class UserHomeActivity extends AppCompatActivity
 
                         FeedsDetails feedsDetails = new Gson().fromJson(categoryFeeds.get(j).toString(), FeedsDetails.class);
                         categorizedFeedsData.add(feedsDetails);
-
                     }
                 }
 
@@ -307,6 +306,8 @@ public class UserHomeActivity extends AppCompatActivity
                 break;
 
             case R.id.register_complaint :
+                Intent registerComplaint = new Intent(UserHomeActivity.this, RegisterComplaintActivity.class);
+                startActivity(registerComplaint);
                 break;
 
             case R.id.logout :

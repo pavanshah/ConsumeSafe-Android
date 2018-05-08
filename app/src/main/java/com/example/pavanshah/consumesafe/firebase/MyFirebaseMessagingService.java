@@ -1,7 +1,9 @@
 package com.example.pavanshah.consumesafe.firebase;
 
+import android.content.Intent;
 import android.util.Log;
 
+import com.example.pavanshah.consumesafe.bus.DetailsActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -18,7 +20,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d("FCM", "Message data payload: " + remoteMessage.getData());
-
         }
 
         // Check if message contains a notification payload.
