@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -50,13 +51,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity{
 
     private FirebaseAuth mFirebaseAuth;
     private static final int RC_SIGN_IN = 123;
     FirebaseUser activeUser;
     private GoogleSignInClient mGoogleSignInClient;
     ProgressDialog loginProgress;
+    ArrayList<FeedsDetails> globalFeedsData;
+    GlobalFeedsAdapter globalFeedsAdapter;
+    int page_no = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +101,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
 
                             Intent intent1 = new Intent(LoginActivity.this, LandingActivity.class);
+                            intent1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent1);
                         }
                     });
@@ -105,12 +110,10 @@ public class LoginActivity extends AppCompatActivity {
         //All declarations
         SignInButton loginButton = findViewById(R.id.loginButton);
         loginButton.setSize(SignInButton.SIZE_WIDE);
-        ListView globalFeeds = (ListView) findViewById(R.id.globalFeeds);
+        final ListView globalFeeds = (ListView) findViewById(R.id.globalFeeds);
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         activeUser = mFirebaseAuth.getCurrentUser();
         loginButton.setVisibility(activeUser == null ? View.VISIBLE : View.GONE);
-        final ProgressBar loading_spinner = (ProgressBar) findViewById(R.id.loading_spinner);
-        loading_spinner.setVisibility(View.VISIBLE);
 
         //All listeners
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -130,16 +133,52 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         //Populate global feeds
 
-        final JSONObject dataJSON = new JSONObject();
-        final ArrayList<FeedsDetails> globalFeedsData = new ArrayList<>();
-        final GlobalFeedsAdapter globalFeedsAdapter = new GlobalFeedsAdapter(getApplicationContext(), globalFeedsData);
+        globalFeedsData = new ArrayList<>();
+        globalFeedsAdapter = new GlobalFeedsAdapter(getApplicationContext(), globalFeedsData);
         globalFeeds.setAdapter(globalFeedsAdapter);
+        fetchGlobalData(page_no);
+
+        globalFeeds.setOnScrollListener(new AbsListView.OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
+                        && (globalFeeds.getLastVisiblePosition() - globalFeeds.getHeaderViewsCount() -
+                        globalFeeds.getFooterViewsCount()) >= (globalFeedsAdapter.getCount() - 1)) {
+
+                    // Now your listview has hit the bottom
+                    fetchGlobalData(++page_no);
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+            }
+        });
+    }
+
+    private void fetchGlobalData(int page_no){
+
+        //globalFeedsData.clear();
+        final ProgressBar loading_spinner = (ProgressBar) findViewById(R.id.loading_spinner);
+        loading_spinner.setVisibility(View.VISIBLE);
+        final JSONObject dataJSON = new JSONObject();
+        final JSONObject finalJSON = new JSONObject();
+
+        Log.d("Product", "page_no "+page_no);
+
+        try {
+            dataJSON.put("page_no", page_no);
+            finalJSON.put("data", dataJSON);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
-        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/globalFeed/fetch", dataJSON, new HTTPRequestHandler.VolleyCallback() {
+        httpRequestHandler.sendHTTPRequest(Request.Method.POST,"/globalFeed/fetch", finalJSON, new HTTPRequestHandler.VolleyCallback() {
 
             @Override
             public void onSuccess(JSONObject jSONObject) throws JSONException {
@@ -148,8 +187,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 loading_spinner.setVisibility(View.GONE);
 
-                Log.d("feeds", "length "+allRecalls.length());
-                for(int i = 0 ; i < allRecalls.length() ; i++)
+                Log.d("Product", "Data length "+allRecalls.length());
+                for(int i = allRecalls.length()-20 ; i < allRecalls.length() ; i++)
                 {
                     FeedsDetails feedsDetails = new Gson().fromJson(allRecalls.get(i).toString(), FeedsDetails.class);
                     globalFeedsData.add(feedsDetails);
@@ -160,7 +199,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

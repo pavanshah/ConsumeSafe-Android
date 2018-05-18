@@ -152,6 +152,8 @@ public class ScanActivity extends AppCompatActivity {
 
                 Log.d("IMAGECAPTURE", "scanReceipt");
                 Intent takePictureIntent = new Intent("android.media.action.IMAGE_CAPTURE");
+                takePictureIntent.putExtra("android.intent.extras.CAMERA_FACING_BACK", 1);
+
                 try {
                     if (createImageFile() != null) {
                         Uri photoURI = null;
