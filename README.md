@@ -1,3 +1,6 @@
+## Link to the server and web client
+https://github.com/appsmehta/ConsumeSafe
+
 ## ConsumeSafe - A recall Watchdog
 ![ezgif com-resize](https://user-images.githubusercontent.com/22826481/38646468-ee2d6812-3d9c-11e8-8c97-8005d14faaf4.gif)
 
